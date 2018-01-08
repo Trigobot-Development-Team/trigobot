@@ -24,11 +24,11 @@ async def on_message(message):
 		command = command[3:]
 		#excludes the $$$ from command
 		if command == "email":
-			await client.send_message(message.channel, content="Usem o suporte \
-			de problemas, idiotas!")
+			await client.send_message(message.channel, \
+			content="Usem o suporte de problemas, idiotas!")
 		elif command == "anunciar":
-				await client.send_message(message.channel, content= 'Vai po \
-				caralho <@%s>' % message.author.id)
+				await client.send_message(message.channel, \
+				content= 'Vai po caralho <@%s>' % message.author.id)
 
 	elif 'pestana' in message.content.lower():
 		await client.send_message(message.channel, \
@@ -38,8 +38,9 @@ async def on_message(message):
 		await client.send_message(message.channel, \
 		content="NOPAI")
 	elif 'email' in message.content.lower():
-		await client.send_message(message.channel, content='Por não usares o \
-		suporte de problemas é que chumbaste, <@%s>' % message.author.id)
+		await client.send_message(message.channel, \
+		content='Por não usares o suporte de problemas é que chumbaste, <@%s>'\
+		 % message.author.id)
 
 	if 'http://www.wolframalpha.com/pro/' in message.content:
 		await client.delete_message(message)
