@@ -3,6 +3,7 @@ import discord
 import asyncio
 
 from hooks import run_hooks
+import rss_autorefresh
 
 logging.basicConfig(level=logging.INFO)
 client = discord.Client()
@@ -18,6 +19,9 @@ async def on_message(message):
         return
 
     run_hooks(client, message)
+
+# RSS auto-refresh
+rss_autorefresh.run(client)
 
 # TODO: use env variable for token, remove it from repo and regen 
 client.run('MzY2Mjg2NDY4NjUxNjc5NzY1.DOZWwg.YnR8LoBL2_LGhHCIE_ydPgN67EA')
