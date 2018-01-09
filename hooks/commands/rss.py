@@ -31,11 +31,11 @@ async def run(client, message = None, **kwargs):
                 # TODO: consider calling client.send_message without await
                 #       instead of constructing a big message in memory
                 msg = format_feed_entry(feed['name'], entry)
-                await client.send_message(client.get_channel(ANNOUNCE_CHANNEL_ID), content=msg)
-            else:
-                break
 
-        feed['time'] = data['entries'][0]['published_parsed'] # Most recent date
+                await client.send_message(client.get_channel(ANNOUNCE_CHANNEL_ID), content=msg)
+
+        feed['time'] = max(map(lambda entry: entry['published_parsed'], \
+                               data['entries'])) # Most recent date
         new_feeds.append(feed)
 
     f = open('feeds.json', 'w')
