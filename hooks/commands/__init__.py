@@ -1,16 +1,19 @@
-__all__ = ['email', 'anunciar']
+__all__ = ['email', 'anunciar', 'rss']
 
 # Bring all commands into this module's scope
 from . import *
 
 # TODO: add cooldown (staff unaffected)
-async def command_hook(client, message):
+async def run(client, message):
     if message.content.startswith('$$$'):
         parts = message.content[3:].split(" ")
         command = parts[0]
 
         if command in __all__:
-            await eval(command).run(client, message, args=parts[1:])
+            try:
+                await eval(command).run(client, message, args=parts[1:])
+            except:
+                await client.send_message(message.channel, content='Erro ao executar comando')
         else:
             # TODO: be funny
             await client.send_message(message.channel, content='Comando inválido')

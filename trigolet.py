@@ -10,7 +10,10 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    logging.info('We have logged in as {0.user}'.format(client))
+
+    # RSS auto-refresh
+    await rss_autorefresh.run(client)
 
 @client.event
 async def on_message(message):
@@ -18,10 +21,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    run_hooks(client, message)
+    await run_hooks(client, message)
 
-# RSS auto-refresh
-rss_autorefresh.run(client)
-
-# TODO: use env variable for token, remove it from repo and regen 
-client.run('MzY2Mjg2NDY4NjUxNjc5NzY1.DOZWwg.YnR8LoBL2_LGhHCIE_ydPgN67EA')
+if __name__ == '__main__':
+    # TODO: use env variable for token, remove it from repo and regen
+    client.run('MzY2Mjg2NDY4NjUxNjc5NzY1.DOZWwg.YnR8LoBL2_LGhHCIE_ydPgN67EA')

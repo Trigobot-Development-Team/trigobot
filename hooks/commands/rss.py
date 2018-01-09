@@ -1,6 +1,9 @@
 import re
 import json
 import feedparser
+import logging
+
+ANNOUNCE_CHANNEL_ID='357975075468607491'
 
 def strip_html(s):
     return re.sub('<[^<]+?>|\\xa0|&#34;', '', s)
@@ -11,14 +14,13 @@ def format_feed_entry(feed_name, entry):
     return '{} {} \n{}\n'.format(feed_name, entry['link'], \
                                  strip_html(entry['summary']))
 
-async def run(client, message = None):
+async def run(client, message = None, **kwargs):
     # TODO: Use a proper DB (Redis?) for optimized I/O
     f = open('feeds.json')
     feeds = json.load(f)
     f.close()
 
     new_feeds = []          # New json data to dump after fetching
-    msg = ''
 
     for feed in feeds:
         data = feedparser.parse(feed['link'])
@@ -28,7 +30,8 @@ async def run(client, message = None):
                 list(entry['published_parsed']) > feed['time']:
                 # TODO: consider calling client.send_message without await
                 #       instead of constructing a big message in memory
-                msg += format_feed_entry(feed['name'], entry)
+                msg = format_feed_entry(feed['name'], entry)
+                await client.send_message(client.get_channel(ANNOUNCE_CHANNEL_ID), content=msg)
             else:
                 break
 
@@ -39,4 +42,7 @@ async def run(client, message = None):
     json.dump(new_feeds, f)
     f.close()
 
-    await client.send_message(message.channel, content=msg)
+    if message is not None:
+        await client.send_message(message.channel, content='Feed atualizado com sucesso')
+
+    logging.info('RSS feeds refreshed')

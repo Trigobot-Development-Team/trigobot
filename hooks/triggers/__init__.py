@@ -8,7 +8,7 @@ async def run(client, message):
     message_str = message.content.lower()
     for trigger in __all__:
         if trigger in message_str:
-            eval(trigger).run(client, message)
+            await eval(trigger).run(client, message)
             return True
     
     return False
