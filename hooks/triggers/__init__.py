@@ -5,10 +5,8 @@ from . import *
 
 # TODO: add cooldown
 async def run(client, message):
-    message_str = message.content.lower()
-    for trigger in __all__:
-        if trigger in message_str:
-            await eval(trigger).run(client, message)
+    for trigger in map(eval, __all__):
+        if await trigger.run(client, message):
             return True
     
     return False
