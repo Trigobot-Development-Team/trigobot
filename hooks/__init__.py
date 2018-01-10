@@ -1,4 +1,4 @@
-__all__ = ['commands', 'limpar_wolfram', 'triggers']
+__all__ = ['commands', 'clear_wolfram', 'triggers']
 
 # Bring all hooks into this module's scope
 from . import *
