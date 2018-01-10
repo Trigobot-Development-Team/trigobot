@@ -1,4 +1,4 @@
-__all__ = ['pestana', 'mindmap', 'email']
+__all__ = ['pestana', 'mindmap', 'email', 'linux']
 
 # Bring all trigger handlers into this module's scope
 from . import *
@@ -8,5 +8,5 @@ async def run(client, message):
     for trigger in map(eval, __all__):
         if await trigger.run(client, message):
             return True
-    
+
     return False
