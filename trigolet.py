@@ -12,7 +12,12 @@ client = discord.Client()
 async def on_ready():
     logging.info('We have logged in as {0.user}'.format(client))
 
-    # RSS auto-refresh
+    big_brother = discord.Game()
+    big_brother.name = 'bit.ly/BigBrotherLEIC'
+    big_brother.url = 'https://bit.ly/BigBrotherLEIC'
+    await client.change_presence(game=big_brother)
+
+    # RSS auto-refresh - blocks on_ready callback
     await rss_autorefresh.run(client)
 
 @client.event
