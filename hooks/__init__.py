@@ -6,6 +6,6 @@ from . import *
 async def run_hooks(client, message):
     # Runs at most one hook
     # Avoids double replieshooks
-    for hook in __all__:
-        if await eval(hook).run(client, message):
+    for hook in map(eval, __all__):
+        if await hook.run(client, message):
             return
