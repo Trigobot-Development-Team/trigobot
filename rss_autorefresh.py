@@ -5,7 +5,7 @@ import logging
 async def run(client, interval = 3600):
     while True:
         logging.info('Refreshing RSS feed(s)')
-        
+
         try:
             await refresh_rss(client)
         except Exception as err:

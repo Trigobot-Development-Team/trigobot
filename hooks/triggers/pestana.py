@@ -1,5 +1,7 @@
+from discord import Client, Message
+
 # TODO: add cooldown
-async def run(client, message):
+async def run(client: Client, message: Message) -> bool:
     if 'pestana' not in message.content.lower():
         return False
 

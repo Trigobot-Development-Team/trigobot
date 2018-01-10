@@ -3,18 +3,20 @@ import json
 import feedparser
 import logging
 
+from discord import Client, Message
+
 ANNOUNCE_CHANNEL_ID='357975075468607491'
 
-def strip_html(s):
+def strip_html(s: str) -> str:
     return re.sub('<[^<]+?>|\\xa0|&#34;', '', s)
 
-def format_feed_entry(feed_name, entry):
+def format_feed_entry(feed_name: str, entry: dict) -> str:
     # TODO: convert HTML to Markdown for readability
     # TODO: shorten link(s) (?)
     return '{} {} \n{}\n'.format(feed_name, entry['link'], \
                                  strip_html(entry['summary']))
 
-async def run(client, message = None, **kwargs):
+async def run(client: Client, message: Message = None, **kwargs):
     # TODO: Use a proper DB (Redis?) for optimized I/O
     f = open('feeds.json')
     feeds = json.load(f)

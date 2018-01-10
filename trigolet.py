@@ -21,7 +21,7 @@ async def on_ready():
     await rss_autorefresh.run(client)
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     # Avoid answering itself
     if message.author == client.user:
         return

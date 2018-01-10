@@ -3,10 +3,11 @@ __all__ = ['email', 'anunciar', 'rss', 'undo']
 # Bring all commands into this module's scope
 from . import *
 
+from discord import Client, Message
 import logging
 
 # TODO: add cooldown (staff unaffected)
-async def run(client, message):
+async def run(client: Client, message: Message) -> bool:
     if message.content.startswith('$$$'):
         parts = message.content[3:].split(" ")
         command = parts[0]
@@ -21,7 +22,7 @@ async def run(client, message):
         else:
             # TODO: be funny
             await client.send_message(message.channel, content='Comando inválido')
-        
+
         return True
     else:
         return False

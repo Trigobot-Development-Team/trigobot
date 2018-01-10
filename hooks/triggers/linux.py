@@ -21,7 +21,7 @@ PATTERNS = [
     '{}(grande|[^n])*{}'.format(GOOD_NAMES, BAD_ADJ),
     '{}(grande|[^n])*{}'.format(BAD_NAMES, GOOD_ADJ)
 ]
-def should_run(message: str):
+def should_run(message: str) -> bool:
     for pattern in PATTERNS:
         if re.search(pattern, message) != None:
             print(message)
@@ -30,7 +30,7 @@ def should_run(message: str):
 
     return False
 
-async def run(client: Client, message: Message):
+async def run(client: Client, message: Message) -> bool:
     if should_run(message.content.lower()):
         await client.send_message(message.channel, \
             content = MSG_GNULAG_TEXT, embed = MSG_GNULAG_EMBED)

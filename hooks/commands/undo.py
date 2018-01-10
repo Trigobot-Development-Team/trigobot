@@ -6,7 +6,7 @@ async def run(client: Client, message: Message, **kwargs):
         if msg.author == client.user:
             await client.delete_message(msg)
             break
-    
+
     # Try to delete the $$$undo call, fail silently when you don't have permission
     try:
         await client.delete_message(message)
@@ -14,4 +14,3 @@ async def run(client: Client, message: Message, **kwargs):
         pass
     except Exception as err:
         raise err
-    
