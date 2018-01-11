@@ -4,8 +4,7 @@ import re
 MSG_GNULAG_EMBED = Embed()
 MSG_GNULAG_EMBED.set_image(url='https://i.redditmedia.com/BHGtcc38EEDH-9xcVl9_55QAmkX7YLIIb-qD-wsMRK0.jpg?w=1024&s=b8856843e5c2bb1b9d0f85966e6c07cc')
 
-TOSMARCEL_ID = '338745476449042433'
-MSG_GNULAG_TEXT = '<@{}> is gonna send you to the GNUlag if you don\'t take that back.'.format(TOSMARCEL_ID)
+MSG_GNULAG_TEXT = '**@Marcelo Stallman** is gonna send you to the GNUlag if you don\'t take that back.'
 
 GOOD_NAMES = '(gnu|linux|open.source|software.livre|free.software)'
 BAD_NAMES = '(microsoft|windows|micro\$oft|win|window\$|proprietary)'
