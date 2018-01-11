@@ -1,5 +1,6 @@
 from discord import Client, Message, Channel, User, Embed
 from policy import check_permissions
+import re
 
 def get_user_by_name(client: Client, name: str) -> User:
     for server in client.servers:
@@ -33,6 +34,11 @@ async def run(client: Client, message: Message, **kwargs):
         destination = await get_channel_by_name(client, message.author, destination)
 
     msg_content = str.join(' ', kwargs['args'][1:])
+    p = re.compile('@\w+#\d{4}') # regex expression for mention
+    userMentions = p.findall(msg_content)
+    if not userMentions == []:
+        for usr in userMentions:
+            msg_content.replace(usr, '<@%s>' % usr[1:]) # fix mentions
 
     # Make sure that when acting on a server we use that server's roles
     if destination.is_private:
