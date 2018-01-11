@@ -16,8 +16,14 @@ async def run(client: Client, message: Message) -> bool:
             logging.info('{} called $$${}'.format(message.author.display_name, command))
             try:
                 await eval(command).run(client, message, args=parts[1:])
+            except PermissionError as err:
+                await client.send_message(message.channel, content='Accesso negado')
+                logging.info(err)
             except Exception as err:
                 await client.send_message(message.channel, content='Erro ao executar comando')
+
+                # Raise the exception, let logging take care of it
+                # The bot won't crash, just the handler for this message
                 raise err
         else:
             # TODO: be funny
