@@ -1,4 +1,4 @@
-__all__ = ['email', 'anunciar', 'rss', 'undo', 'say']
+__all__ = ['email', 'anunciar', 'rss', 'undo', 'say', 'help']
 
 # Bring all commands into this module's scope
 from . import *
