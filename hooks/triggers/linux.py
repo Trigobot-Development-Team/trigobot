@@ -23,8 +23,6 @@ PATTERNS = [
 def should_run(message: str) -> bool:
     for pattern in PATTERNS:
         if re.search(pattern, message) != None:
-            print(message)
-            print('matched', pattern)
             return True
 
     return False
