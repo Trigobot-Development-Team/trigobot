@@ -7,7 +7,7 @@ MSG_GNULAG_EMBED.set_image(url='https://i.redditmedia.com/BHGtcc38EEDH-9xcVl9_55
 MSG_GNULAG_TEXT = '**@Marcelo Stallman** is gonna send you to the GNUlag if you don\'t take that back.'
 
 GOOD_NAMES = '(gnu|linux|open.source|software.livre|free.software)'
-BAD_NAMES = '(microsoft|windows|micro\$oft|win|window\$|proprietary)'
+BAD_NAMES = '(microsoft|windows|micro\\$oft|win|window\\$|proprietary)'
 
 GOOD_ADJ = '(bom|excelente|bae|melhor|great|excellent|best|good|love|adoro)'
 BAD_ADJ = '(merda|crap|bosta|shit|sucks|mau|horr(i|í)vel|fraco|bad|awful|terrible|turd)'
