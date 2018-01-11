@@ -17,8 +17,8 @@ async def on_ready():
     big_brother.url = 'https://bit.ly/BigBrotherLEIC'
     await client.change_presence(game=big_brother)
 
-    # RSS auto-refresh - blocks on_ready callback
-    await rss_autorefresh.run(client)
+    # RSS auto-refresh
+    client.loop.create_task(rss_autorefresh.run(client))
 
 @client.event
 async def on_message(message: discord.Message):
