@@ -39,10 +39,7 @@ async def run(client: Client, message: Message, **kwargs):
         raise ValueError('You can\'t sch sch!')
 
     new_channel = kwargs['args'][0]
-    if new_channel == 'here':
-        new_channel = message.channel
-    else:
-        new_channel = await get_channel_by_name(client, message, new_channel)
+    new_channel = await get_channel_by_name(client, message, new_channel)
 
     # Make sure that when acting on a server we use that server's roles
     # Member != User
