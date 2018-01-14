@@ -47,16 +47,19 @@ async def run(client: Client, message: Message, **kwargs):
     # Make sure that when acting on a server we use that server's roles
     # Member != User
     if new_channel.is_private:
-        new_author = message.author
+        author = message.author
     else:
-        new_author = new_channel.server.get_member(message.author.id)
+        author = new_channel.server.get_member(message.author.id)
 
-    # Transform message - the sudo-ing
+    # Transform message - the sch-ing
     new_message = copy(message)
     new_message.content = str.join(' ', message.content.split(' ')[2:]).lstrip()
 
-    new_message.author = new_author
+    new_message.author = author
     new_message.channel = new_channel
+
+    if not new_message.content.startswith('$$$'):
+        new_message.content = '$$$' + new_message.content
 
     # Save original channel, for any error/completion messages
     kwargs['sch_orig_channel'] = message.channel

@@ -49,6 +49,9 @@ async def run(client: Client, message: Message, **kwargs):
     new_message.author = new_user
     new_message.content = str.join(' ', kwargs['args'][1:]).lstrip()
 
+    if not new_message.content.startswith('$$$'):
+        new_message.content = '$$$' + new_message.content
+
     # Save original user, to respect permissions
     kwargs['su_orig_user'] = message.author
 
