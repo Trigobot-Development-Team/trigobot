@@ -10,8 +10,16 @@ async def run_command(client: Client, message: Message, **kwargs):
 
     kwargs['args'] = parts[1:]
 
+    author = message.author
+    if 'su_orig_user' in kwargs:
+        author = kwargs['su_orig_user']
+
+    channel = message.channel
+    if 'sch_orig_channel' in kwargs:
+        channel = kwargs['sch_orig_channel']
+
     if command in __all__:
-        logging.info('%s called $$$%s', message.author.display_name, command)
+        logging.info('%s called $$$%s in %s', author.name, command, channel.name)
 
         await import_module('.' + command, 'hooks.commands').run(client, message, **kwargs)
 
