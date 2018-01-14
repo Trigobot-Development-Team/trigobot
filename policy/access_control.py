@@ -16,7 +16,11 @@ def AccessControl(**rules):
         def _wrapper(*args, **kwargs):
             message = args[1]
 
-            if check_permissions(message.channel, message.author, **rules):
+            user = message.author
+            if 'su_orig_user' in kwargs:
+                user = kwargs['su_orig_user']
+
+            if check_permissions(message.channel, user, **rules):
                 return fn(*args, **kwargs)
             else:
                 raise PermissionError('Permission denied in {} to {}'.format(fn, message.author))
