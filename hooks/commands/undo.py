@@ -1,4 +1,4 @@
-from discord import Client, Message, Forbidden
+from discord import Client, Message, Forbidden, NotFound
 from policy import AccessControl
 import logging
 
@@ -9,10 +9,12 @@ async def run(client: Client, message: Message, **kwargs):
             await client.delete_message(msg)
             break
 
-    # Try to delete the $$$undo call, fail silently when you don't have permission
+    # Try to delete the $$$undo call
     try:
         await client.delete_message(message)
-    except Forbidden:
+    except (Forbidden, NotFound):
+        # fail silently when you don't have permission/are using sch
         pass
-    except Exception as err:
-        raise err
+
+    if 'sch_orig_channel' in kwargs:
+        await client.send_message(kwargs['sch_orig_channel'], content='Feito')

@@ -1,4 +1,4 @@
-__all__ = ['email', 'anunciar', 'rss', 'undo', 'say', 'help', 'su']
+__all__ = ['email', 'anunciar', 'rss', 'undo', 'say', 'help', 'su', 'sch']
 
 from discord import Client, Message
 from importlib import import_module
