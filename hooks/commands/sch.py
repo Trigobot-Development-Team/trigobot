@@ -5,6 +5,11 @@ from discord import Client, Message, Channel
 from . import run_command
 from .su import get_user_from_mention
 
+SHORT_HELP_TEXT = '$$$sch [canal] [comando] - Executa comando noutro canal'
+
+def help(**kwargs):
+    return SHORT_HELP_TEXT
+
 async def get_channel_by_name(client: Client, message: Message, name: str) -> Channel:
     # TODO: extract mention handling logic into their own functions
 

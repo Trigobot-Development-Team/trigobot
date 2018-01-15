@@ -2,6 +2,11 @@ from copy import copy
 from discord import Client, Message, User
 from . import run_command
 
+SHORT_HELP_TEXT = '$$$su [utilizador] [comando] - Executa comando como outro utilizador'
+
+def help(**kwargs):
+    return SHORT_HELP_TEXT
+
 def get_user_by_name(client: Client, name: str) -> User:
     for member in client.get_all_members():
         if member.name == name:

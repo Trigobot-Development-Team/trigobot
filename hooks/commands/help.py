@@ -1,14 +1,36 @@
+from importlib import import_module
 from discord import Client, Message
+from . import MODULE_LIST
 
-# TODO: each command should specify its own help text
-HELP_TEXT=str.join('\n', [
-    '$$$help - Mostra ajuda',
-    '$$$email, $$$anunciar - Fun',
-    '$$$rss - Força atualização dos feeds',
-    '$$$undo - Remove última resposta do bot (no canal atual) (Staff only, excepto em PMs e #botrequests)',
-    '$$$say (@nick|#canal|here) (mensagem) - Faz o bot dizer alguma coisa (Staff only, excepto em PMs e #botrequests'
-])
+SHORT_HELP_TEXT = str.join('\n', [
+    '$$$help - Mostra ajuda sumária para todos os comandos',
+    '$$$help [comando] - Mostra ajuda para um comando'
+    ])
+
+def help(**kwargs):
+    return SHORT_HELP_TEXT
+
+def get_module(name: str):
+    return import_module('.' + name, 'hooks.commands')
+
+def get_module_short_help(name: str) -> str:
+    if name == 'help':
+        return SHORT_HELP_TEXT
+    else:
+        return get_module(name).SHORT_HELP_TEXT
+
+def get_module_long_help(name: str, **kwargs) -> str:
+    if name == 'help':
+        return help(**kwargs)
+    else:
+        return get_module(name).help(**kwargs)
 
 async def run(client: Client, message: Message, **kwargs):
-    # TODO: distinguish between $$$help and $$$help <command>
-    await client.send_message(message.channel, content=HELP_TEXT)
+    if len(kwargs['args']) > 0:
+        name = kwargs['args'][0]
+        kwargs['args'] = kwargs['args'][1:]
+        msg_text = get_module_long_help(name, **kwargs)
+    else:
+        msg_text = str.join('\n', map(get_module_short_help, MODULE_LIST))
+
+    await client.send_message(message.channel, content=msg_text)

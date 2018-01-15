@@ -2,6 +2,11 @@ from discord import Client, Message
 from policy import AccessControl
 import re
 
+SHORT_HELP_TEXT = '$$$say [mensagem] - Faz-me dizer uma mensagem'
+
+def help(**kwargs):
+    return SHORT_HELP_TEXT
+
 @AccessControl(roles=['Staff'], relax_in=['botrequests'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     msg_content = str.join(' ', kwargs['args'])

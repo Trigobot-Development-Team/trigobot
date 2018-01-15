@@ -1,4 +1,5 @@
-__all__ = ['email', 'anunciar', 'rss', 'undo', 'say', 'help', 'su', 'sch']
+MODULE_LIST = ['help', 'anunciar', 'email', 'rss', 'say', 'sch', 'su', 'undo']
+__all__ = MODULE_LIST
 
 from discord import Client, Message
 from importlib import import_module
@@ -18,7 +19,7 @@ async def run_command(client: Client, message: Message, **kwargs):
     if 'sch_orig_channel' in kwargs:
         channel = kwargs['sch_orig_channel']
 
-    if command in __all__:
+    if command in MODULE_LIST:
         logging.info('%s called $$$%s in %s', author.name, command, channel.name)
 
         await import_module('.' + command, 'hooks.commands').run(client, message, **kwargs)
