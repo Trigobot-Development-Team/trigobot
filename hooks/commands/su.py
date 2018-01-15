@@ -1,5 +1,6 @@
 from copy import copy
 from discord import Client, Message, User
+from policy import AccessControl
 from . import run_command
 
 SHORT_HELP_TEXT = '$$$su [utilizador] [comando] - Executa comando como outro utilizador'
@@ -39,6 +40,7 @@ def get_user_from_mention(client: Client, mentions: list, mention: str) -> User:
 
         return get_user_by_id(client, mentions, name)
 
+@AccessControl(roles=['Staff'], relax_in=['botrequests'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     if 'su_orig_user' in kwargs:
         raise ValueError('You can\'t su su')
