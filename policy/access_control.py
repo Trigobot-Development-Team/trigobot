@@ -23,7 +23,7 @@ def AccessControl(**rules):
             if check_permissions(message.channel, user, **rules):
                 return fn(*args, **kwargs)
             else:
-                raise PermissionError('Permission denied in {} to {}'.format(fn, message.author))
+                raise PermissionError('Permission denied in {} to {}'.format(__name__, message.author))
 
         return _wrapper
 
