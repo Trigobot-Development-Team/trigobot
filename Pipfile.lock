@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "46ee93fea1d243e0d52d95b95686aa2c2204f92c4e9c688e2e3d0a65f77716d7"
+            "sha256": "8c4d20063d561b1ff14e3ed14ab1197e8e416aa202907b1108cf91c21a72055e"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -43,6 +43,13 @@
             ],
             "version": "==1.0.5"
         },
+        "aioredis": {
+            "hashes": [
+                "sha256:29774c1191793403eaf7885ea2a562affd36a04d113e319bbcb27ebfbb22a832",
+                "sha256:9d735f09117e68fe8a2bf1e1d1d2d31287fffa023903a3629fdc43c391787c0f"
+            ],
+            "version": "==1.0.0"
+        },
         "async-timeout": {
             "hashes": [
                 "sha256:d3a195a827b0f4068d1616ae2da04aac62e365d14f2b13dbc071f9feed9db4e2",
@@ -70,6 +77,12 @@
                 "sha256:cd2485472e41471632ed3029d44033ee420ad0b57111db95c240c9160a85831c"
             ],
             "version": "==5.2.1"
+        },
+        "hiredis": {
+            "hashes": [
+                "sha256:ca958e13128e49674aa4a96f02746f5de5973f39b57297b84d59fd44d314d5b5"
+            ],
+            "version": "==0.2.0"
         },
         "multidict": {
             "hashes": [
