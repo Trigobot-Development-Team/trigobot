@@ -1,4 +1,4 @@
-__all__ = ['refresh', 'add', 'get', 'list', 'remove', 'setdate']
+__all__ = ['refresh', 'add', 'get', 'list', 'remove', 'setdate', 'import', 'dump']
 
 from importlib import import_module
 from discord import Client, Message

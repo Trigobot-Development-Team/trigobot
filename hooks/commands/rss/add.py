@@ -11,11 +11,9 @@ SHORT_HELP_TEXT = '$$$rss add [name] [url] - Adiciona feed RSS para monitorizaç
 def help(**kwargs):
     return SHORT_HELP_TEXT
 
-async def add_feed(redis: RedisConnection, name: str, url: str):
+async def add_feed(redis: RedisConnection, name: str, url: str, current_timestamp: int = get_current_timestamp()):
     if await redis.sismember('feeds', url):
         raise ValueError('Feed already being tracked: {}'.format(url))
-
-    current_timestamp = get_current_timestamp()
 
     # Send all commands together for efficiency
     pipe = redis.pipeline()
