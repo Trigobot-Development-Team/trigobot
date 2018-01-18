@@ -1,4 +1,7 @@
+import os
 import aioredis
+
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost')
 
 conn = None
 
@@ -7,6 +10,6 @@ async def get_connection() -> aioredis.RedisConnection:
 
     # Lazy connection
     if conn is None:
-        conn = await aioredis.create_redis('redis://localhost', encoding='utf-8')
+        conn = await aioredis.create_redis(REDIS_URL, encoding='utf-8')
 
     return conn
