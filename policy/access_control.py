@@ -9,7 +9,7 @@ def check_permissions(channel: Channel, user: Member, **kwargs) -> bool:
        (channel.is_private and user in channel.recipients and relax_pm):
         return True
     else:
-        return (not channel.is_private) and user.top_role in role_whitelist
+        return (not channel.is_private) and str(user.top_role) in role_whitelist
 
 def AccessControl(**rules):
     def _decorate(fn):
