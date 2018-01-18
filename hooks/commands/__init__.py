@@ -1,9 +1,10 @@
-MODULE_LIST = ['help', 'anunciar', 'email', 'rss', 'say', 'sch', 'su', 'undo']
-__all__ = MODULE_LIST
+import logging
+from importlib import import_module
 
 from discord import Client, Message
-from importlib import import_module
-import logging
+
+MODULE_LIST = ['help', 'anunciar', 'email', 'rss', 'say', 'sch', 'su', 'undo']
+__all__ = MODULE_LIST
 
 async def run_command(client: Client, message: Message, **kwargs):
     parts = message.content[3:].split(' ')
@@ -33,7 +34,7 @@ async def run(client: Client, message: Message) -> bool:
         try:
             await run_command(client, message)
         except PermissionError as err:
-            await client.send_message(message.channel, content='Accesso negado')
+            await client.send_message(message.channel, content='Acesso negado')
             logging.info(err)
         except NotImplementedError as err:
             await client.send_message(message.channel, content='Comando inválido: '+str(err))
