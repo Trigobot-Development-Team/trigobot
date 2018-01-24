@@ -2,9 +2,10 @@ from discord import Client, Message
 
 # TODO: add cooldown
 async def run(client: Client, message: Message) -> bool:
-    if 'mindmap' not in message.content.lower():
-        return False
+    TRIGGERS = ['mindmap', 'mind map', 'mapa mental']
+    for trigger in TRIGGERS:
+        if trigger in message.content.lower():
+            await client.send_message(message.channel, content='NOPAI')
+            return True
 
-    await client.send_message(message.channel, \
-                              content='NOPAI')
-    return True
+    return False
