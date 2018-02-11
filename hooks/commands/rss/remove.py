@@ -30,5 +30,5 @@ async def run(client: Client, message: Message, **kwargs):
     pipe.delete('feed:'+url)
     pipe.delete('feed:index:'+name)
 
-    await pipe.execute
+    await pipe.execute()
     client.send_message(message.channel, content='Feito')
