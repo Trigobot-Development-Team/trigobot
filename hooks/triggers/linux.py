@@ -1,4 +1,5 @@
 from discord import Embed, Message, Client
+from ._randomness import RandomChance
 import re
 
 MSG_GNULAG_EMBED = Embed()
@@ -27,6 +28,7 @@ def should_run(message: str) -> bool:
 
     return False
 
+@RandomChance(0.9)
 async def run(client: Client, message: Message) -> bool:
     if should_run(message.content.lower()):
         await client.send_message(message.channel, \
