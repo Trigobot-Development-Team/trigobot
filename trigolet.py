@@ -5,6 +5,8 @@ import asyncio
 from hooks import run_hooks
 import rss_autorefresh
 
+PIN_MIN_REACTIONS = 3
+
 logging.basicConfig(level=logging.INFO)
 client = discord.Client()
 
@@ -27,6 +29,11 @@ async def on_message(message: discord.Message):
         return
 
     await run_hooks(client, message)
+
+@client.event
+async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
+    if reaction.emoji == '📌' and reaction.count >= PIN_MIN_REACTIONS and not reaction.message.pinned:
+        await client.pin_message(reaction.message)
 
 if __name__ == '__main__':
     # TODO: use env variable for token, remove it from repo and regen
