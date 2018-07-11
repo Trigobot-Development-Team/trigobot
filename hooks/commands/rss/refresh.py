@@ -88,7 +88,7 @@ async def check_update_entry(client: Client, channel: Channel, redis: RedisConne
 
         if cur_hash != old_hash:
             # repeats format_feed_entry call but it's not a perf issue
-            publish_entry(client, channel, redis, name, entry)
+            await publish_entry(client, channel, redis, name, entry)
 
             # mark old message as old
             old_msg = await client.get_message(channel, old_msg_id)
