@@ -4,6 +4,7 @@ import logging
 import feedparser
 import redis_conn
 
+from time import time
 from calendar import timegm
 from aioredis import RedisConnection
 from discord import Client, Message, Channel
@@ -46,72 +47,53 @@ async def refresh_feed(client: Client, channel: Channel, redis: RedisConnection,
     data = feedparser.parse(url)
     last_update = int(metadata['last_update'])
     new_last_update = last_update
+    cur_timestamp = time()
 
     for entry in data['entries']:
         entry_timestamp = timegm(entry['published_parsed'])
 
         if metadata['last_update'] is None or \
             entry_timestamp > last_update:
-            msg = format_feed_entry(metadata['name'], entry)
 
-            message = await client.send_message(channel, content=msg)
+            await publish_entry(client, channel, redis, metadata['name'], entry)
 
             if entry_timestamp > new_last_update:
                 new_last_update = entry_timestamp
-
-            # Add update to hash, field=url, value=hash+message_id
-            field = entry.link
-            value = hashtext(msg) + message.id
-            await redis.hset('updates:'+url, field, value)
+        else:
+            if cur_timestamp - entry_timestamp < 3600*24*7: # perf: only try updating up to 3-day old entries
+                await check_update_entry(client, channel, redis, metadata['name'], entry)
 
     await redis.hset('feed:'+url, 'last_update', new_last_update)
-    await check_changes(client, channel, redis, url)
-    await keep_short(client, channel, redis, url)
 
-async def check_changes(client: Client, channel: Channel, redis: RedisConnection, url: str):
-    logging.info('Checking for changes in feed %s', url)
+async def publish_entry(client: Client, channel: Channel, redis: RedisConnection, name: str, entry: dict):
+    # send message
+    msg_content = format_feed_entry(name, entry)
+    msg = await client.send_message(channel, content=msg)
 
-    metadata = await redis.hgetall('feed:'+url)
-    data = feedparser.parse(url)
-    for entry in data['entries']:
-        field = entry.link
+    # save id & content hash to keep track of updates
+    key = 'lastupdate:'+entry.link
+    tr = redis.multi_exec() # save and set expiration atomically
+    tr.set(key, hashtext(msg_content) + message.id)
+    tr.expire(key, 3600 * 48) # ignore updates after two days
+    await tr.execute()
 
-        if await redis.hexists('updates:'+url, field):
-            msg = format_feed_entry(metadata['name'], entry)
-            new_hash = hashtext(msg)
+async def check_update_entry(client: Client, channel: Channel, redis: RedisConnection, name: str, entry: dict):
+    last_published_entry = await redis.get('lastupdate:'+entry.link)
+    if last_published_entry is not None:
+        old_msg_id = last_published_entry[32:]
+        old_hash = last_published_entry[:32]
 
-            value = await redis.hget('updates:'+url, field)
-            old_hash = value[:32]
+        cur_msg_content = format_feed_entry(name, entry)
+        cur_hash = hashtext(cur_msg_content)
 
-            if new_hash != old_hash:
-                message_id = value[32:]
-                message = await client.send_message(channel, content = msg)
-                value = new_hash + message.id
-                await redis.hset('updates:'+url, field, value)
+        if cur_hash != old_hash:
+            # repeats format_feed_entry call but it's not a perf issue
+            publish_entry(client, channel, redis, name, entry)
 
-async def keep_short(client: Client, channel: Channel, redis: RedisConnection, url: str):
-    # If the hash has more than MAX_UPDATES updates delete the oldest one
-    hash_len = await redis.hlen('updates:'+url)
-    if hash_len > MAX_UPDATES:
-        hash_ = await redis.hgetall('updates':+url) # Returns the hash as a dict
-        hash_fields = keys(hash_)
-
-        field = hash_fields[0]
-        value = hash_[field]
-        msg_id = value[32:]
-        msg = await client.get_message(channel, msg_id)
-        early_time = msg.timestamp
-        for f in hash_fields[1:]:
-
-            temp_value = hash_[f]
-            temp_msg_id = temp_value[32:]
-            temp_msg = await client.get_message(channel, msg_id)
-
-            if temp_msg.timestamp < early_time:
-                field = temp_field
-                early_time = temp_msg.timestamp
-
-        await redis.hdel('updates:'+url, field)
+            # mark old message as old
+            old_msg = await client.get_message(channel, old_msg_id)
+            new_content = '**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + old_msg.content + '~~'
+            await client.edit_message(old_msg, new_content=new_content)
 
 async def run(client: Client, message: Message = None, **kwargs):
     redis = await redis_conn.get_connection()
