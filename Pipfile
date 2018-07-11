@@ -14,6 +14,7 @@ aioredis = "*"
 
 [dev-packages]
 
+pylint = "*"
 
 
 [requires]
