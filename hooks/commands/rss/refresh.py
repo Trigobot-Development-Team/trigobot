@@ -68,12 +68,12 @@ async def refresh_feed(client: Client, channel: Channel, redis: RedisConnection,
 async def publish_entry(client: Client, channel: Channel, redis: RedisConnection, name: str, entry: dict):
     # send message
     msg_content = format_feed_entry(name, entry)
-    msg = await client.send_message(channel, content=msg)
+    msg = await client.send_message(channel, content=msg_content)
 
     # save id & content hash to keep track of updates
     key = 'lastupdate:'+entry.link
     tr = redis.multi_exec() # save and set expiration atomically
-    tr.set(key, hashtext(msg_content) + message.id)
+    tr.set(key, hashtext(msg_content) + msg.id)
     tr.expire(key, 3600 * 48) # ignore updates after two days
     await tr.execute()
 
