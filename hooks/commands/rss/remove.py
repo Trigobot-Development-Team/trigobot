@@ -29,6 +29,7 @@ async def run(client: Client, message: Message, **kwargs):
     pipe.srem('feeds', url)
     pipe.delete('feed:'+url)
     pipe.delete('feed:index:'+name)
+    pipe.delete('updates:'+url)     # is this how you delete the hash?
 
     await pipe.execute()
     await client.send_message(message.channel, content='Feito')
