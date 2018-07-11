@@ -85,7 +85,7 @@ async def check_changes(client: Client, channel: Channel, redis: RedisConnection
 
             if new_hash != old_hash:
                 message_id = value[32:]
-                message = await client.edit_message(message_id, content = msg)
+                message = await client.send_message(channel, content = msg)
                 value = new_hash + message.id
                 await redis.hset('updates:'+url, field, value)
 
