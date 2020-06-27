@@ -2,6 +2,7 @@ import logging
 from importlib import import_module
 
 from discord import Client, Message
+from discord.abc import GuildChannel
 
 MODULE_LIST = ['help', 'anunciar', 'email', 'rss', 'say', 'sch', 'su', 'undo']
 __all__ = MODULE_LIST
@@ -21,7 +22,11 @@ async def run_command(client: Client, message: Message, **kwargs):
         channel = kwargs['sch_orig_channel']
 
     if command in MODULE_LIST:
-        logging.info('%s called $$$%s in %s', author.name, command, channel.name)
+        ch_name = "<unnamed channel>"
+        if isinstance(channel, GuildChannel):
+            ch_name = channel.name
+
+        logging.info('%s called $$$%s in %s', author.name, command, ch_name)
 
         await import_module('.' + command, 'hooks.commands').run(client, message, **kwargs)
 
@@ -34,12 +39,12 @@ async def run(client: Client, message: Message) -> bool:
         try:
             await run_command(client, message)
         except PermissionError as err:
-            await client.send_message(message.channel, content='Acesso negado')
+            await message.channel.send(content='Acesso negado')
             logging.info(err)
         except NotImplementedError as err:
-            await client.send_message(message.channel, content='Comando inválido: '+str(err))
+            await message.channel.send(content='Comando inválido: '+str(err))
         except Exception as err:
-            await client.send_message(message.channel, content='Erro ao executar comando')
+            await message.channel.send(content='Erro ao executar comando')
 
             # Raise the exception, let logging take care of it
             # The bot won't crash, just the handler for this message

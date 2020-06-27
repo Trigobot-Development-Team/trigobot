@@ -22,4 +22,4 @@ async def run(client: Client, message: Message, **kwargs):
     if not message_text:
         message_text = 'Lista vazia'
 
-    await client.send_message(message.channel, content=message_text)
+    await message.channel.send(content=message_text)

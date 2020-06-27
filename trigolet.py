@@ -14,10 +14,8 @@ client = discord.Client()
 async def on_ready():
     logging.info('We have logged in as {0.user}'.format(client))
 
-    big_brother = discord.Game()
-    big_brother.name = 'bit.ly/BigBrotherLEIC'
-    big_brother.url = 'https://bit.ly/BigBrotherLEIC'
-    await client.change_presence(game=big_brother)
+    big_brother = discord.CustomActivity("BigBrother@LEIC :eyes:")
+    await client.change_presence(activity=big_brother)
 
     # RSS auto-refresh
     client.loop.create_task(rss_autorefresh.run(client))
@@ -33,7 +31,7 @@ async def on_message(message: discord.Message):
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
     if reaction.emoji == '📌' and reaction.count >= PIN_MIN_REACTIONS and not reaction.message.pinned:
-        await client.pin_message(reaction.message)
+        await reaction.message.pin()
 
 if __name__ == '__main__':
     # TODO: use env variable for token, remove it from repo and regen

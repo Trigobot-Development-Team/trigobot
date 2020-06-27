@@ -32,4 +32,4 @@ async def run(client: Client, message: Message, **kwargs):
     pipe.delete('updates:'+url)     # is this how you delete the hash?
 
     await pipe.execute()
-    await client.send_message(message.channel, content='Feito')
+    await message.channel.send(content='Feito')

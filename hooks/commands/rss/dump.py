@@ -21,4 +21,4 @@ async def run(client: Client, message: Message, **kwargs):
 
         dump.append(data)
 
-    await client.send_message(message.channel, content=json.dumps(dump))
+    await message.channel.send(content=json.dumps(dump))

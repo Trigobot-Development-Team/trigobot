@@ -7,5 +7,4 @@ def help(**kwargs):
 
 # TODO: implement cooldown
 async def run(client: Client, message: Message, **kwargs):
-    await client.send_message(message.channel, \
-                              content= 'Vai po caralho <@%s>' % message.author.id)
+    await message.channel.send(content= 'Vai po caralho <@%s>' % message.author.id)

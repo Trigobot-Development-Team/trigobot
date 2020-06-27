@@ -46,4 +46,4 @@ async def run(client: Client, message: Message, **kwargs):
 
     await add_feed(redis, name, url)
 
-    await client.send_message(message.channel, content='Feito')
+    await message.channel.send(content='Feito')

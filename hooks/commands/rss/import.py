@@ -22,5 +22,4 @@ async def run(client: Client, message: Message, **kwargs):
         except Exception:
             pass
 
-    await client.send_message(message.channel, \
-                              content='{} feeds adicionados com sucesso.'.format(str(counter)))
+    await message.channel.send(content='{} feeds adicionados com sucesso.'.format(str(counter)))

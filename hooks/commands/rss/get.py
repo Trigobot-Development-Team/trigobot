@@ -38,4 +38,4 @@ async def run(client: Client, message: Message, **kwargs):
         url = await get_url_from_name(redis, url)
 
     info_text = await get_feed_info(redis, url)
-    await client.send_message(message.channel, content=info_text)
+    await message.channel.send(content=info_text)

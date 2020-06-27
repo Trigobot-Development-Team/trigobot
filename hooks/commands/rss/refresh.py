@@ -7,10 +7,10 @@ import redis_conn
 from time import time
 from calendar import timegm
 from aioredis import RedisConnection
-from discord import Client, Message, Channel
+from discord import Client, Message, TextChannel
 from hashlib import md5
 
-ANNOUNCE_CHANNEL_ID = '357975075468607491'
+ANNOUNCE_CHANNEL_ID = 357975075468607491
 MAX_UPDATES = 5
 
 SHORT_HELP_TEXT = str.join('\n', [
@@ -41,7 +41,7 @@ def hashtext(text: str) -> int:
     hash_object = md5(text.encode())    # generates the md5 hash of a given str
     return hash_object.hexdigest()
 
-async def refresh_feed(client: Client, channel: Channel, redis: RedisConnection, url: str):
+async def refresh_feed(client: Client, channel: TextChannel, redis: RedisConnection, url: str):
     logging.info('Refreshing feed %s', url)
 
     metadata = await redis.hgetall('feed:'+url)
@@ -66,10 +66,10 @@ async def refresh_feed(client: Client, channel: Channel, redis: RedisConnection,
 
     await redis.hset('feed:'+url, 'last_update', new_last_update)
 
-async def publish_entry(client: Client, channel: Channel, redis: RedisConnection, name: str, entry: dict):
+async def publish_entry(client: Client, channel: TextChannel, redis: RedisConnection, name: str, entry: dict):
     # send message
     msg_content = format_feed_entry(name, entry)
-    msg = await client.send_message(channel, content=msg_content)
+    msg = await channel.send(content=msg_content)
 
     # save id & content hash to keep track of updates
     key = 'lastupdate:'+entry.link
@@ -78,7 +78,7 @@ async def publish_entry(client: Client, channel: Channel, redis: RedisConnection
     tr.expire(key, 3600 * 48) # ignore updates after two days
     await tr.execute()
 
-async def check_update_entry(client: Client, channel: Channel, redis: RedisConnection, name: str, entry: dict):
+async def check_update_entry(client: Client, channel: TextChannel, redis: RedisConnection, name: str, entry: dict):
     last_published_entry = await redis.get('lastupdate:'+entry.link)
     if last_published_entry is not None:
         old_msg_id = last_published_entry[32:]
@@ -92,9 +92,9 @@ async def check_update_entry(client: Client, channel: Channel, redis: RedisConne
             await publish_entry(client, channel, redis, name, entry)
 
             # mark old message as old
-            old_msg = await client.get_message(channel, old_msg_id)
+            old_msg = await channel.fetch_message(old_msg_id)
             new_content = '**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + old_msg.content + '~~'
-            await client.edit_message(old_msg, new_content=new_content)
+            await old_msg.edit(content=new_content)
 
 async def run(client: Client, message: Message = None, **kwargs):
     redis = await redis_conn.get_connection()
@@ -106,6 +106,6 @@ async def run(client: Client, message: Message = None, **kwargs):
         await refresh_feed(client, channel, redis, feed_url)
 
     if message is not None:
-        await client.send_message(message.channel, content='Feeds atualizados com sucesso')
+        await message.channel.send(content='Feeds atualizados com sucesso')
 
     logging.info('RSS feeds refreshed')

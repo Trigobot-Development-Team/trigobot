@@ -7,7 +7,7 @@ async def run(client: Client, message: Message) -> bool:
     if 'mail' not in message.content.lower():
         return False
 
-    await client.send_message(message.channel, \
-                              content='Por não usares o suporte de problemas é que chumbaste, <@%s>'\
+    await message.channel.send( \
+                                content='Por não usares o suporte de problemas é que chumbaste, <@%s>'\
                               % message.author.id)
     return True

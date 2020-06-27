@@ -38,4 +38,4 @@ async def run(client: Client, message: Message, **kwargs):
         new_last_update = get_current_timestamp()
 
     await redis.hset('feed:'+url, 'last_update', new_last_update)
-    client.send_message(message.channel, content='Feito')
+    message.channel.send(content='Feito')
