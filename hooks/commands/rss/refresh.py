@@ -22,10 +22,11 @@ def help(**kwargs):
     return SHORT_HELP_TEXT
 
 def strip_html(s: str) -> str:
-    return re.sub('<[^<]+?>|\\xa0|&#34;', '', s)
+    data = re.sub('<br[^>]>', '\n', data)
+
+    return re.sub('<[^<]+?>|\\xa0', '', data)
 
 def format_feed_entry(feed_name: str, entry: dict) -> str:
-    # TODO: convert HTML to Markdown for readability
     # TODO: shorten link(s) (?)
     msg = '{} {} \n{}\n'.format(feed_name, entry['link'], \
                                 strip_html(entry['summary']))
