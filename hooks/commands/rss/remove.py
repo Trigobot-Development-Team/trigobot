@@ -1,35 +1,19 @@
-from aioredis import RedisConnection
 from discord import Client, Message
 
-from .get import get_url_from_name
-
-import redis_conn
+import feed_state
 from policy import AccessControl
 
-SHORT_HELP_TEXT = '$$$rss remove [name|url] - Remove feed do sistema'
+SHORT_HELP_TEXT = '$$$rss remove <name> - Remove feed do sistema'
 
 def help(**kwargs):
     return SHORT_HELP_TEXT
 
 @AccessControl(roles=['Staff'])
 async def run(client: Client, message: Message, **kwargs):
-    redis = await redis_conn.get_connection()
-
     try:
-        url = kwargs['args'][0]
+        name = kwargs['args'][0]
     except IndexError:
-        raise ValueError('Missing argument: URL')
+        raise ValueError('Missing argument: name')
 
-    if not url.startswith('http'):
-        url = await get_url_from_name(redis, url)
-
-    name = await redis.hget('feed:'+url, 'name')
-
-    pipe = redis.pipeline()
-    pipe.srem('feeds', url)
-    pipe.delete('feed:'+url)
-    pipe.delete('feed:index:'+name)
-    pipe.delete('updates:'+url)     # is this how you delete the hash?
-
-    await pipe.execute()
+    feed_state.delete(name)
     await message.channel.send(content='Feito')

@@ -3,3 +3,5 @@ env
 **/__pycache__
 *.pyc
 *.pyo
+
+feed_state.json

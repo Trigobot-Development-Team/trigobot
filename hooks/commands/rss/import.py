@@ -1,25 +1,13 @@
-import json
-
 from discord import Client, Message
 
-import redis_conn
-from .add import add_feed
+import feed_state
 
-SHORT_HELP_TEXT = '$$$rss import - Importa lista de feeds (JSON)'
+SHORT_HELP_TEXT = '$$$rss import <dados em JSON> - Importa lista de feeds substituindo os existentes'
 
 def help(**kwargs):
     return SHORT_HELP_TEXT
 
 async def run(client: Client, message: Message, **kwargs):
-    redis = await redis_conn.get_connection()
-    dump = json.loads(str.join(' ', kwargs['args']))
+    feed_state.loads(str.join(' ', kwargs['args']))
 
-    counter = 0
-    for feed in dump:
-        try:
-            await add_feed(redis, feed['name'], feed['url'], feed['last_update'])
-            counter += 1
-        except Exception:
-            pass
-
-    await message.channel.send(content='{} feeds adicionados com sucesso.'.format(str(counter)))
+    await message.channel.send(content='Feeds importados com sucesso.')
