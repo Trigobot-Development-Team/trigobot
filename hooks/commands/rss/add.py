@@ -1,7 +1,7 @@
 import feedparser
 from discord import Client, Message
 
-import feedstate
+import feed_state
 from policy import AccessControl
 
 SHORT_HELP_TEXT = '$$$rss add <name> <url> [last_update] - Adiciona feed RSS para monitorização'
