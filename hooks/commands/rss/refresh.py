@@ -26,7 +26,7 @@ def help(**kwargs):
     return SHORT_HELP_TEXT
 
 def strip_html(s: str) -> str:
-    data = re.sub('<br[^>]>', '\n', data)
+    data = re.sub('<br[^>]>', '\n', s)
 
     return re.sub('<[^<]+?>|\\xa0', '', data)
 
