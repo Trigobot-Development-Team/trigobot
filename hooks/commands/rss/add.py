@@ -26,6 +26,6 @@ async def run(client: Client, message: Message, **kwargs):
     except Exception:
         raise ValueError('Invalid feed URL: {}'.format(url))
 
-    await feed_state.add(*kwargs['args'])
+    feed_state.add(*kwargs['args'])
 
     await message.channel.send(content='Feito')
