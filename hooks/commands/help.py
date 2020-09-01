@@ -33,4 +33,4 @@ async def run(client: Client, message: Message, **kwargs):
     else:
         msg_text = str.join('\n', map(get_module_short_help, MODULE_LIST))
 
-    await client.send_message(message.channel, content=msg_text)
+    await message.channel.send(content=msg_text)

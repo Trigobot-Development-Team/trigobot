@@ -31,8 +31,7 @@ def should_run(message: str) -> bool:
 @RandomChance(0.9)
 async def run(client: Client, message: Message) -> bool:
     if should_run(message.content.lower()):
-        await client.send_message(message.channel, \
-            content = MSG_GNULAG_TEXT, embed = MSG_GNULAG_EMBED)
+        await message.channel.send(content = MSG_GNULAG_TEXT, embed = MSG_GNULAG_EMBED)
 
         return True
 

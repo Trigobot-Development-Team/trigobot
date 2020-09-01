@@ -2,9 +2,8 @@ from datetime import datetime
 from calendar import timegm
 from discord import Client, Message
 
-import redis_conn
+import feed_state
 from policy import AccessControl
-from .get import get_url_from_name
 
 SHORT_HELP_TEXT = '$$$rss setdate [nome|url] [timestamp|now|None] - \
 Redefine data de última atualização para um feed'
@@ -17,15 +16,10 @@ def get_current_timestamp() -> int:
 
 @AccessControl(roles=['Staff'])
 async def run(client: Client, message: Message, **kwargs):
-    redis = await redis_conn.get_connection()
-
     try:
-        url = kwargs['args'][0]
+        name = kwargs['args'][0]
     except IndexError:
-        raise ValueError('Missing argument: URL/name')
-
-    if not url.startswith('http'):
-        url = await get_url_from_name(redis, url)
+        raise ValueError('Missing argument: name')
 
     try:
         new_last_update = kwargs['args'][1]
@@ -37,5 +31,5 @@ async def run(client: Client, message: Message, **kwargs):
     elif new_last_update == 'now':
         new_last_update = get_current_timestamp()
 
-    await redis.hset('feed:'+url, 'last_update', new_last_update)
-    client.send_message(message.channel, content='Feito')
+    feed_state.update(name, new_last_update)
+    message.channel.send(content='Feito')

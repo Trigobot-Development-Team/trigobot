@@ -11,15 +11,15 @@ def help(**kwargs):
 async def run(client: Client, message: Message, **kwargs):
     async for msg in client.logs_from(message.channel, limit=100):
         if msg.author == client.user:
-            await client.delete_message(msg)
+            await msg.delete()
             break
 
     # Try to delete the $$$undo call
     try:
-        await client.delete_message(message)
+        await message.delete()
     except (Forbidden, NotFound):
         # fail silently when you don't have permission/are using sch
         pass
 
     if 'sch_orig_channel' in kwargs:
-        await client.send_message(kwargs['sch_orig_channel'], content='Feito')
+        await kwargs['sch_orig_channel'].send(content='Feito')

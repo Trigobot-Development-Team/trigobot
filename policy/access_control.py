@@ -1,15 +1,16 @@
-from discord import Member, Channel
+from discord import Member, TextChannel
+from discord.abc import PrivateChannel, GuildChannel
 
-def check_permissions(channel: Channel, user: Member, **kwargs) -> bool:
+def check_permissions(channel: TextChannel, user: Member, **kwargs) -> bool:
     role_whitelist = kwargs['roles']
     relaxed_channels = kwargs.get('relax_in', [])
     relax_pm = kwargs.get('relax_pm', False)
 
-    if channel.name in relaxed_channels or \
-       (channel.is_private and user in channel.recipients and relax_pm):
+    if isinstance(channel, GuildChannel) and channel.name in relaxed_channels or \
+       (isinstance(channel, PrivateChannel) and user in channel.recipients and relax_pm):
         return True
     else:
-        return (not channel.is_private) and str(user.top_role) in role_whitelist
+        return isinstance(channel, GuildChannel) and str(user.top_role) in role_whitelist
 
 def AccessControl(**rules):
     def _decorate(fn):

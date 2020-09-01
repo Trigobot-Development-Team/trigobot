@@ -1,7 +1,8 @@
 import logging
 
 from copy import copy
-from discord import Client, Message, Channel
+from discord import Client, Message, TextChannel
+from discord.abc import PrivateChannel
 from . import run_command
 from .su import get_user_from_mention
 
@@ -10,12 +11,12 @@ SHORT_HELP_TEXT = '$$$sch [canal] [comando] - Executa comando noutro canal'
 def help(**kwargs):
     return SHORT_HELP_TEXT
 
-async def get_channel_by_name(client: Client, message: Message, name: str) -> Channel:
+async def get_channel_by_name(client: Client, message: Message, name: str) -> TextChannel:
     # TODO: extract mention handling logic into their own functions
 
     if name.startswith('#'):
         name = name[1:]
-        for server in client.servers:
+        for server in client.guilds:
             for channel in server.channels:
                 if channel.name == name:
                     return channel
@@ -37,7 +38,7 @@ async def get_channel_by_name(client: Client, message: Message, name: str) -> Ch
         if user is None:
             raise ValueError('User not found: {}'.format(name))
 
-        return await client.start_private_message(user)
+        return await user.create_dm()
 
 async def run(client: Client, message: Message, **kwargs):
     if 'sch_orig_channel' in kwargs:
@@ -48,10 +49,10 @@ async def run(client: Client, message: Message, **kwargs):
 
     # Make sure that when acting on a server we use that server's roles
     # Member != User
-    if new_channel.is_private:
+    if isinstance(new_channel, PrivateChannel):
         author = message.author
     else:
-        author = new_channel.server.get_member(message.author.id)
+        author = new_channel.guild.get_member(message.author.id)
 
     # Transform message - the sch-ing
     new_message = copy(message)

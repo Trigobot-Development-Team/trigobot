@@ -1,41 +1,32 @@
 from datetime import datetime
 
-import aioredis
 from discord import Client, Message
 
-import redis_conn
+import feed_state
 
-SHORT_HELP_TEXT = '$$$rss get [name|url] - Mostra informação sobre um feeds em monitorização'
+SHORT_HELP_TEXT = '$$$rss get <name> - Mostra informação sobre um feeds em monitorização'
 
 def help(**kwargs):
     return SHORT_HELP_TEXT
 
-async def get_url_from_name(redis: aioredis.RedisConnection, name: str) -> str:
-    return await redis.get('feed:index:'+name)
-
-def format_timestamp(timestamp: str) -> str:
-    dt = datetime.utcfromtimestamp(int(timestamp))
+def format_timestamp(timestamp: float) -> str:
+    dt = datetime.utcfromtimestamp(timestamp)
     return dt.strftime('%Y/%m/%d %H:%M:%S UTC%z')
 
-async def get_feed_info(redis: aioredis.RedisConnection, url: list):
-    metadata = await redis.hgetall('feed:'+url)
+def format_feed(name: str) -> str:
+    url = feed_state.get_url(name)
+    last_update = feed_state.get_last_update(name)
 
     return '**{}**: {}\nÚltima atualização: {}'.format(
-            metadata['name'],
+            name,
             url,
-            format_timestamp(metadata['last_update'])
+            format_timestamp(last_update)
         )
 
 async def run(client: Client, message: Message, **kwargs):
-    redis = await redis_conn.get_connection()
-
     try:
         url = kwargs['args'][0]
     except IndexError:
-        raise ValueError('Missing argument: URL')
+        raise ValueError('Missing argument: name')
 
-    if not url.startswith('http'):
-        url = await get_url_from_name(redis, url)
-
-    info_text = await get_feed_info(redis, url)
-    await client.send_message(message.channel, content=info_text)
+    await message.channel.send(content=format_feed(name))

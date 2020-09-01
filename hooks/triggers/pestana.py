@@ -7,6 +7,5 @@ async def run(client: Client, message: Message) -> bool:
     if 'pestana' not in message.content.lower():
         return False
 
-    await client.send_message(message.channel, \
-                              content='Onde é que anda o Gabi?')
+    await message.channel.send(content='Onde é que anda o Gabi?')
     return True

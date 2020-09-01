@@ -16,7 +16,7 @@ async def run(client: Client, message: Message, **kwargs):
         for usr in user_mentions:
             msg_content.replace(usr, '<@%s>' % usr[1:]) # fix mentions
 
-    await client.send_message(message.channel, content=msg_content)
+    await message.channel.send(content=msg_content)
 
     if 'sch_orig_channel' in kwargs:
-        await client.send_message(kwargs['sch_orig_channel'], content='Feito')
+        await kwargs['sch_orig_channel'].send(content='Feito')

@@ -1,10 +1,7 @@
-import asyncio
-from functools import partial
-
 from discord import Client, Message
 
-import redis_conn
-from .get import get_feed_info
+import feed_state
+from .get import format_feed
 
 SHORT_HELP_TEXT = '$$$rss list - Lista feeds em monitorização'
 
@@ -12,14 +9,11 @@ def help(**kwargs):
     return SHORT_HELP_TEXT
 
 async def run(client: Client, message: Message, **kwargs):
-    redis = await redis_conn.get_connection()
-    feed_urls = await redis.smembers('feeds')
-
     message_text = ''
-    for url in feed_urls:
-        message_text += await get_feed_info(redis, url) + '\n'
+    for name in feed_state.get_names():
+        message_text += format_feed(name) + '\n'
 
-    if not message_text:
-        message_text = 'Lista vazia'
+    if len(message_text) == 0:
+        message_text = 'Não há feeds.'
 
-    await client.send_message(message.channel, content=message_text)
+    await message.channel.send(content=message_text)

@@ -24,7 +24,7 @@ def get_user_by_id(client: Client, mentions: list, uid: str) -> User:
         if member.id == uid:
             return member
 
-    return client.get_user_info(uid)
+    return client.fetch_user(uid)
 
 def get_user_from_mention(client: Client, mentions: list, mention: str) -> User:
     if mention.startswith('@'):
