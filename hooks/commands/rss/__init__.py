@@ -1,4 +1,4 @@
-__all__ = ['refresh', 'add', 'get', 'list', 'remove', 'setdate', 'import', 'dump']
+__all__ = ['refresh', 'add', 'get', 'list', 'remove', 'setdate', 'import', 'dump', 'join']
 
 from importlib import import_module
 from discord import Client, Message
@@ -6,15 +6,27 @@ from discord import Client, Message
 SHORT_HELP_TEXT = '$$$rss [...] - Gere feeds RSS (inclui subcomandos)'
 
 def get_subcommand(name: str):
+    """
+    Select subcommand
+    """
     return import_module('.' + name, 'hooks.commands.rss')
 
 def get_subcommand_short_help(name: str) -> str:
+    """
+    Show subcommand help
+    """
     return get_subcommand(name).SHORT_HELP_TEXT
 
 def get_subcommand_long_help(name: str, **kwargs) -> str:
+    """
+    Show subcommand long help
+    """
     return get_subcommand(name).help(**kwargs)
 
 def help(**kwargs):
+    """
+    Show help
+    """
     if not kwargs['args']:
         return str.join('\n', map(get_subcommand_short_help, __all__))
     else:
@@ -23,6 +35,9 @@ def help(**kwargs):
         return get_subcommand_long_help(name, **kwargs)
 
 async def run(client: Client, message: Message = None, **kwargs):
+    """
+    Run command
+    """
     args = kwargs.get('args', [])
     if not args or args[0] == '':
         command = 'refresh'

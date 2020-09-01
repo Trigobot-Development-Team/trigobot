@@ -10,7 +10,7 @@ from calendar import timegm
 from discord import Client, Message, TextChannel
 from hashlib import md5
 
-ANNOUNCE_CHANNEL_ID = 357975075468607491
+ANNOUNCE_CHANNEL_ID = 750401922267086948
 MAX_UPDATES = 5
 
 SHORT_HELP_TEXT = str.join('\n', [
@@ -22,17 +22,26 @@ SHORT_HELP_TEXT = str.join('\n', [
 # maps entry.link -> (message_id, content_hash)
 published_cache = lrucache(128)
 
-def help(**kwargs):
+def help(**kwargs) -> str:
+    """
+    Show help
+    """
     return SHORT_HELP_TEXT
 
 def strip_html(s: str) -> str:
+    """
+    Convert HTML to Markdown
+    """
     data = re.sub('<br[^>]>', '\n', s)
 
     return re.sub('<[^<]+?>|\\xa0', '', data)
 
 def format_feed_entry(feed_name: str, entry: dict) -> str:
+    """
+    Format message
+    """
     # TODO: shorten link(s) (?)
-    msg = '{} {} \n{}\n'.format(feed_name, entry['link'], \
+    msg = '**{}** {}\n{}'.format(feed_name, entry['link'], \
                                 strip_html(entry['summary']))
 
     # Shorten text when needed or Discord will refuse to send the message
@@ -42,10 +51,16 @@ def format_feed_entry(feed_name: str, entry: dict) -> str:
     return msg
 
 def hashtext(text: str) -> int:
+    """
+    Generate MD5 digest
+    """
     hash_object = md5(text.encode())    # generates the md5 hash of a given str
     return hash_object.hexdigest()
 
 async def refresh_feed(client: Client, channel: TextChannel, name: str):
+    """
+    Check each feed for new messages
+    """
     logging.info('Refreshing feed %s', name)
 
     url = feed_state.get_url(name)
@@ -69,6 +84,9 @@ async def refresh_feed(client: Client, channel: TextChannel, name: str):
     feed_state.update(name, new_last_update)
 
 async def publish_entry(client: Client, channel: TextChannel, name: str, entry: dict):
+    """
+    Send feed message and update LRU Cache
+    """
     # send message
     msg_content = format_feed_entry(name, entry)
     msg = await channel.send(content=msg_content)
@@ -77,6 +95,9 @@ async def publish_entry(client: Client, channel: TextChannel, name: str, entry: 
     published_cache[entry.link] = (msg.id, hashtext(msg_content))
 
 async def check_update_entry(client: Client, channel: TextChannel, name: str, entry: dict):
+    """
+    Check if new version is available, replace the old message and publish a new one
+    """
     try:
         (old_msg_id, old_hash) = published_cache[entry.link]
 
@@ -97,6 +118,9 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
         return
 
 async def run(client: Client, message: Message = None, **kwargs):
+    """
+    Run command
+    """
     channel = client.get_channel(ANNOUNCE_CHANNEL_ID)
 
     for feed_name in feed_state.get_names():

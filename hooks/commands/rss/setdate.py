@@ -9,13 +9,22 @@ SHORT_HELP_TEXT = '$$$rss setdate [nome|url] [timestamp|now|None] - \
 Redefine data de última atualização para um feed'
 
 def help(**kwargs):
+    """
+    Show help
+    """
     return SHORT_HELP_TEXT
 
 def get_current_timestamp() -> int:
+    """
+    Get current timestamp (UTC)
+    """
     return timegm(datetime.utcnow().utctimetuple())
 
 @AccessControl(roles=['Staff'])
 async def run(client: Client, message: Message, **kwargs):
+    """
+    Run commands
+    """
     try:
         name = kwargs['args'][0]
     except IndexError:

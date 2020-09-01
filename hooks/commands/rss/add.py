@@ -7,10 +7,16 @@ from policy import AccessControl
 SHORT_HELP_TEXT = '$$$rss add <name> <url> [last_update] - Adiciona feed RSS para monitorização'
 
 def help(**kwargs):
+    """
+    Show help
+    """
     return SHORT_HELP_TEXT
 
 @AccessControl(roles=['Staff'])
 async def run(client: Client, message: Message, **kwargs):
+    """
+    Run command
+    """
     args = kwargs['args']
     if len(args) < 1:
         raise ValueError('Missing arguments: name, url')

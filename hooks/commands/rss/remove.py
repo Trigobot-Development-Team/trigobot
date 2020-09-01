@@ -6,10 +6,16 @@ from policy import AccessControl
 SHORT_HELP_TEXT = '$$$rss remove <name> - Remove feed do sistema'
 
 def help(**kwargs):
+    """
+    Show help
+    """
     return SHORT_HELP_TEXT
 
 @AccessControl(roles=['Staff'])
 async def run(client: Client, message: Message, **kwargs):
+    """
+    Run command
+    """
     try:
         name = kwargs['args'][0]
     except IndexError:
