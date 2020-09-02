@@ -13,10 +13,15 @@ CHANNELS_CATEGORY = discord.CategoryChannel
 # @everyone role
 EVERYONE_ROLE = 0
 
-# Basic permissions for new roles
+# Basic permissions for new roles/channels
 ROLE_PERMISSIONS = 0
 ROLE_CHANNEL_PERMISSIONS = discord.PermissionOverwrite(view_channel=True)
 EVERYONE_PERMISSIONS = discord.PermissionOverwrite(view_channel=False)
+
+# Messages to get roles
+special_messages = []
+ROLE_REACTION = '✋'
+ROLES_CHANNEL_ID = 750825003402133524
 
 client = discord.Client()
 
@@ -31,7 +36,9 @@ async def on_ready() -> None:
 
     logging.info('We have logged in as {0.user}'.format(client))
 
-    big_brother = discord.Game("BigBrother@LEIC 👀")
+    big_brother = discord.Streaming(name='BigBrother@LEIC 👀', \
+                                    url='https://bit.ly/BigBrotherLEIC', \
+                                    game='BigBrother@LEIC 👀')
     await client.change_presence(activity=big_brother)
 
     # Default category to create channels (most recently created)
@@ -91,8 +98,11 @@ async def check_role_channel(feed: str) -> None:
                                            color=discord.Colour(random.randint(0, 0xffffff)), \
                                            mentionable=True, \
                                            permissions=ROLE_PERMISSIONS)
+
+            # Send message to receive roles
+            await notify_new_role(role)
         except Exception as err:
-            logging.error("Couldn't create role: %s" % err)
+            logging.error('Couldn\'t create role: %s' % err)
             pass
     else:
         role = roles[feed]
@@ -106,7 +116,7 @@ async def check_role_channel(feed: str) -> None:
                                                             role: ROLE_CHANNEL_PERMISSIONS
                                                         })
         except Exception as err:
-            logging.error("Couldn't create channel: %s" % err)
+            logging.error('Couldn\'t create channel: %s' % err)
             pass
 
 async def check_category(category: str) -> None:
@@ -124,3 +134,16 @@ async def check_category(category: str) -> None:
         CHANNELS_CATEGORY = await guild.create_category_channel(name=category)
     else:
         CHANNELS_CATEGORY = categories[category]
+
+async def notify_new_role(role: discord.Role) -> None:
+    """
+    Send special message for users to react and receive the role
+    """
+    channel = client.get_channel(ROLES_CHANNEL_ID)
+    message = await channel.send(embed=discord.Embed(title='**[' + role.name + ']** Nova cadeira disponível', \
+                          type='rich', \
+                          color=role.color, \
+                          description='Se vais fazer a cadeira **' + role.name + '** reage com ' + \
+                                           ROLE_REACTION + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios'))
+
+    message.add_reaction(ROLE_REACTION)
