@@ -1,10 +1,13 @@
 import discord
+import json
 import logging
+import os
 import random
 
 from hooks import run_hooks
 import rss_autorefresh
 
+PIN_EMOJI = '📌'
 PIN_MIN_REACTIONS = 1
 
 # Current category to create channels
@@ -19,9 +22,11 @@ ROLE_CHANNEL_PERMISSIONS = discord.PermissionOverwrite(view_channel=True)
 EVERYONE_PERMISSIONS = discord.PermissionOverwrite(view_channel=False)
 
 # Messages to get roles
-special_messages = []
-ROLE_REACTION = '✋'
+special_messages = dict()
+ROLE_EMOJI = '✋'
 ROLES_CHANNEL_ID = 750825003402133524
+
+MESSAGES_PATH = os.environ.get('TRIGOBOT_SPECIAL_MESSAGES', './messages.json')
 
 client = discord.Client()
 
@@ -47,6 +52,11 @@ async def on_ready() -> None:
     CHANNELS_CATEGORY = sorted(client.guilds[0].categories, \
                                key=(lambda x: x.created_at), \
                                reverse=True)[0]
+
+    # Load messages to get role
+    global special_messages
+    with open(MESSAGES_PATH, "r") as f:
+        special_messages = json.load(f)
 
     # Get @everyone role
     global EVERYONE
@@ -78,8 +88,33 @@ async def on_reaction_add(reaction: discord.Reaction, user: discord.User) -> Non
     """
     Action to take when a reaction is added to a message
     """
-    if reaction.emoji == '📌' and reaction.count >= PIN_MIN_REACTIONS and not reaction.message.pinned:
+    if reaction.emoji == PIN_EMOJI and reaction.count >= PIN_MIN_REACTIONS and not reaction.message.pinned:
         await reaction.message.pin()
+
+@client.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent) -> None:
+    """
+    Action to take when a reaction is added to message (may not be in cache)
+    """
+    if payload.user_id == client.user.id:
+        return
+
+    guild = client.guilds[0]
+
+    if payload.emoji.name == ROLE_EMOJI and payload.channel_id == ROLES_CHANNEL_ID:
+        user = guild.get_member(payload.user_id)
+        await user.add_roles(guild.get_role(special_messages[str(payload.message_id)]))
+
+@client.event
+async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent) -> None:
+    """
+    Action to take when a reaction is removed from message (may not be in cache)
+    """
+    guild = client.guilds[0]
+
+    if payload.emoji.name == ROLE_EMOJI and payload.channel_id == ROLES_CHANNEL_ID:
+        user = guild.get_member(payload.user_id)
+        await user.remove_roles(guild.get_role(special_messages[str(payload.message_id)]))
 
 async def check_role_channel(feed: str) -> None:
     """
@@ -144,6 +179,17 @@ async def notify_new_role(role: discord.Role) -> None:
                           type='rich', \
                           color=role.color, \
                           description='Se vais fazer a cadeira **' + role.name + '** reage com ' + \
-                                           ROLE_REACTION + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios'))
+                                           ROLE_EMOJI + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios'))
 
-    message.add_reaction(ROLE_REACTION)
+    special_messages[str(message.id)] = role.id
+
+    await message.add_reaction(ROLE_EMOJI )
+    save()
+
+def save() -> None:
+    """
+    Persist special messages data
+    """
+    global special_messages
+    with open(MESSAGES_PATH, "w") as f:
+        json.dump(special_messages, f)
