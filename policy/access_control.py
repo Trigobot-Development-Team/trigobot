@@ -2,17 +2,23 @@ from discord import Member, TextChannel
 from discord.abc import PrivateChannel, GuildChannel
 
 def check_permissions(channel: TextChannel, user: Member, **kwargs) -> bool:
+    """
+    Check if user has permission to execute command
+    """
     role_whitelist = kwargs['roles']
     relaxed_channels = kwargs.get('relax_in', [])
     relax_pm = kwargs.get('relax_pm', False)
 
     if isinstance(channel, GuildChannel) and channel.name in relaxed_channels or \
-       (isinstance(channel, PrivateChannel) and user in channel.recipients and relax_pm):
+       (isinstance(channel, PrivateChannel) and user == channel.recipient and relax_pm):
         return True
     else:
         return isinstance(channel, GuildChannel) and str(user.top_role) in role_whitelist
 
 def AccessControl(**rules):
+    """
+    Decorator to change command permissions
+    """
     def _decorate(fn):
         def _wrapper(*args, **kwargs):
             message = args[1]
