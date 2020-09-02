@@ -4,7 +4,7 @@ from importlib import import_module
 from discord import Client, Message
 from discord.abc import GuildChannel
 
-MODULE_LIST = ['help', 'anunciar', 'email', 'rss', 'say', 'sch', 'su', 'undo']
+MODULE_LIST = ['help', 'anunciar', 'category', 'email', 'rss', 'say', 'sch', 'su', 'undo']
 __all__ = MODULE_LIST
 
 async def run_command(client: Client, message: Message, **kwargs):
