@@ -38,7 +38,7 @@ def dumps() -> str:
     global _feeds
     return json.dumps(_feeds)
 
-def add(name: str, url: str, last_update: float = 0) -> None:
+async def add(name: str, url: str, last_update: float = 0) -> None:
     """
     Add feed
     """
@@ -47,14 +47,22 @@ def add(name: str, url: str, last_update: float = 0) -> None:
         raise ValueError('Feed already exists: `%s`' % name)
 
     _feeds[name] = { 'url': url, 'last_update': last_update }
+    await check_role_channel(name)
     save()
 
-def join(feeds: str) -> None:
+async def join(feeds: str) -> None:
     """
     Join current with given feeds
     """
     global _feeds
-    _feeds = { **_feeds, **json.loads(feeds)}
+
+    feeds = json.loads(feeds)
+
+    subtract = [x for x in feeds.keys() if x not in _feeds.keys()]
+    _feeds = { **_feeds, **feeds}
+    for feed in subtract:
+        await check_role_channel(feed)
+
     save()
 
 def delete(name: str) -> None:

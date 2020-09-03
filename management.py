@@ -14,10 +14,10 @@ PIN_MIN_REACTIONS = 1
 CHANNELS_CATEGORY = discord.CategoryChannel
 
 # @everyone role
-EVERYONE_ROLE = 0
+EVERYONE = None
 
 # Basic permissions for new roles/channels
-ROLE_PERMISSIONS = 0
+ROLE_PERMISSIONS = None
 ROLE_CHANNEL_PERMISSIONS = discord.PermissionOverwrite(view_channel=True)
 EVERYONE_PERMISSIONS = discord.PermissionOverwrite(view_channel=False)
 
@@ -41,9 +41,7 @@ async def on_ready() -> None:
 
     logging.info('We have logged in as {0.user}'.format(client))
 
-    big_brother = discord.Streaming(name='BigBrother@LEIC 👀', \
-                                    url='https://bit.ly/BigBrotherLEIC', \
-                                    game='BigBrother@LEIC 👀')
+    big_brother = discord.Game(name='https://bit.ly/BigBrotherLEIC 👀')
     await client.change_presence(activity=big_brother)
 
     # Default category to create channels (most recently created)
@@ -55,8 +53,11 @@ async def on_ready() -> None:
 
     # Load messages to get role
     global special_messages
-    with open(MESSAGES_PATH, "r") as f:
-        special_messages = json.load(f)
+    try:
+        with open(MESSAGES_PATH, "r") as f:
+            special_messages = json.load(f)
+    except FileNotFoundError:
+        pass
 
     # Get @everyone role
     global EVERYONE
@@ -125,7 +126,7 @@ async def check_role_channel(feed: str) -> None:
     roles = dict(zip(list(map(lambda x: x.name, guild.roles)), guild.roles))
     channels = list(map(lambda x: x.name, CHANNELS_CATEGORY.text_channels))
 
-    role = 0
+    role = None
     # Check role
     if feed not in roles:
         try:
@@ -154,9 +155,44 @@ async def check_role_channel(feed: str) -> None:
             logging.error('Couldn\'t create channel: %s' % err)
             pass
 
+async def delete_role_channel(name: str) -> None:
+    """
+    Delete role, channel and special message (if exists)
+    """
+    guild = client.guilds[0]
+    low = name.lower()
+    roles = dict(zip(list(map(lambda x: x.name.lower(), guild.roles)), guild.roles))
+    channels = dict(zip(list(map(lambda x: x.name.lower(), CHANNELS_CATEGORY.text_channels)), CHANNELS_CATEGORY.text_channels))
+
+    if low not in roles:
+        raise ValueError('Role %s not found' % name)
+
+    role = roles[low].id
+    await roles[low].delete()
+
+    if low not in channels:
+        raise ValueError('Channel %s not found' % name)
+
+    await channels[low].delete()
+
+    # Delete special message
+    message = None
+    for key, item in special_messages.items():
+        if item == role:
+            message = int(key)
+            break
+
+    if message is None:
+        return
+
+    try:
+        await (await guild.get_channel(ROLES_CHANNEL_ID).fetch_message(message)).delete()
+    except discord.NotFound:
+        raise ValueError('Message for getting role %s not found' % name)
+
 async def check_category(category: str) -> None:
     """
-    Check if category exists and create it if not
+    Check if category exists and create if not
     """
     global CHANNELS_CATEGORY
 
@@ -179,7 +215,7 @@ async def notify_new_role(role: discord.Role) -> None:
                           type='rich', \
                           color=role.color, \
                           description='Se vais fazer a cadeira **' + role.name + '** reage com ' + \
-                                           ROLE_EMOJI + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios'))
+                                           ROLE_EMOJI + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios\n Para desistires disto é só removeres a reação'))
 
     special_messages[str(message.id)] = role.id
 

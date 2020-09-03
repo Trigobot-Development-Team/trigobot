@@ -20,7 +20,7 @@ def get_current_timestamp() -> int:
     """
     return timegm(datetime.utcnow().utctimetuple())
 
-@AccessControl(roles=['Staff'])
+@AccessControl(roles=['Staff'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     """
     Run commands

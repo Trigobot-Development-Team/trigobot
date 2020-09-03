@@ -14,6 +14,6 @@ async def run(client: Client, message: Message, **kwargs):
     """
     Run command
     """
-    feed_state.join(str.join(' ', kwargs['args']))
+    await feed_state.join(str.join(' ', kwargs['args']))
 
     await message.channel.send(content='Feeds importados com sucesso.')

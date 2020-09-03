@@ -10,6 +10,7 @@ def help(**kwargs):
     """
     return SHORT_HELP_TEXT
 
+@AccessControl(roles=['Staff'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     """
     Run command

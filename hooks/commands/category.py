@@ -13,4 +13,4 @@ def help(**kwargs) -> str:
 @AccessControl(roles=['Staff'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs) -> None:
     await check_category(kwargs["args"][0])
-    await message.channel.send(content="Feito.")
+    await message.channel.send(content="Feito")

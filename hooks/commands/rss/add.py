@@ -12,7 +12,7 @@ def help(**kwargs):
     """
     return SHORT_HELP_TEXT
 
-@AccessControl(roles=['Staff'])
+@AccessControl(roles=['Staff'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     """
     Run command
@@ -32,6 +32,6 @@ async def run(client: Client, message: Message, **kwargs):
     except Exception:
         raise ValueError('Invalid feed URL: {}'.format(url))
 
-    feed_state.add(*kwargs['args'])
+    await feed_state.add(*kwargs['args'])
 
     await message.channel.send(content='Feito')
