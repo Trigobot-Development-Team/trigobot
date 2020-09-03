@@ -23,7 +23,7 @@ async def get_channel_by_name(client: Client, message: Message, name: str) -> Te
 
         raise ValueError('Channel not found')
     elif name.startswith('<#'):
-        cid = name[2:-1]
+        cid = int(name[2:-1])
 
         for channel in message.channel_mentions:
             if channel.id == cid:

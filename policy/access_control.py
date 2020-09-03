@@ -13,10 +13,9 @@ def check_permissions(client: Client, channel: TextChannel, user: Member, **kwar
 
     relax_pm = kwargs.get('relax_pm', False)
 
-    guild = client.guilds[0]
-    member = guild.get_member(user.id)
+    member = client.guilds[0].get_member(user.id)
 
-    return (isinstance(channel, GuildChannel) and channel.name in relaxed_channels and user.top_role.name in role_whitelist) or \
+    return (isinstance(channel, GuildChannel) and (channel.name in relaxed_channels or user.top_role.name in role_whitelist)) or \
        (isinstance(channel, DMChannel) and relax_pm and member is not None and member.top_role.name in role_whitelist)
 
 def AccessControl(**rules):
