@@ -22,7 +22,7 @@ async def run_command(client: Client, message: Message, **kwargs):
         channel = kwargs['sch_orig_channel']
 
     if command in MODULE_LIST:
-        ch_name = "<unnamed channel>"
+        ch_name = "DMChannel"
         if isinstance(channel, GuildChannel):
             ch_name = channel.name
 
