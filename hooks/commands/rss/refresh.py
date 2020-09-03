@@ -1,14 +1,15 @@
-import re
+import feedparser
 import json
 import logging
-import feedparser
 from pylru import lrucache
+import re
 
 import feed_state
-from time import time
 from calendar import timegm
-from discord import Client, Message, TextChannel
+from discord import Client, Message, Role, TextChannel
 from hashlib import md5
+from management import get_role
+from time import time
 
 ANNOUNCE_CHANNEL_ID = 750401922267086948
 MAX_UPDATES = 5
@@ -28,20 +29,43 @@ def help(**kwargs) -> str:
     """
     return SHORT_HELP_TEXT
 
-def strip_html(s: str) -> str:
+def strip_html(data: str) -> str:
     """
     Convert HTML to Markdown
     """
-    data = re.sub('<br[^>]>', '\n', s)
+    # Transform &amp; into &
+    data = re.sub('&amp;', '&', data)
+    # Transform &lt; into <
+    data = re.sub('&lt;', '<', data)
+    # Transform &#34; into "
+    data = re.sub('&#34;', '"', data)
+    # Transform &#39; into '
+    data = re.sub('&#39;', '\'', data)
+    # Transform &#64 into @
+    data = re.sub('&#64;', '@', data)
+    # Transform <br> into newline
+    data = re.sub('<br[^><\w]*\/?>', '\n', data)
+    # Transform <i> into italic
+    data = re.sub('<\/?i[^<>\w]*>', '*', data)
+    # Transform <b> into bold
+    data = re.sub('<\/?b[^<>\w]*>', '**', data)
+    # Transform headings in newlines and spaces
+    data = re.sub('<h\d?[^<>\w]*>', ' ', data)
+    data = re.sub('<\/h\d?[^<>\w]*>', '\n', data)
+    # Transform some divs into spaces
+    data = re.sub('</div[^<>\w]*>[^\w\n]*<div[^<>\w]*>', '\n', data)
+    # Avoid multiple whitespace
+    data = re.sub('\n{3,}', '\n', data)
+    data = re.sub('\s{3,}', ' ', data)
 
     return re.sub('<[^<]+?>|\\xa0', '', data)
 
-def format_feed_entry(feed_name: str, entry: dict) -> str:
+def format_feed_entry(role: Role, entry: dict) -> str:
     """
     Format message
     """
     # TODO: shorten link(s) (?)
-    msg = '**{}** {}\n{}'.format(feed_name, entry['link'], \
+    msg = '**{}** {}\n{}'.format(role.mention, entry['link'], \
                                 strip_html(entry['summary']))
 
     # Shorten text when needed or Discord will refuse to send the message
@@ -88,7 +112,7 @@ async def publish_entry(client: Client, channel: TextChannel, name: str, entry: 
     Send feed message and update LRU Cache
     """
     # send message
-    msg_content = format_feed_entry(name, entry)
+    msg_content = format_feed_entry(get_role(client, name), entry)
     msg = await channel.send(content=msg_content)
 
     # save id & content hash to keep track of updates
@@ -101,7 +125,7 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
     try:
         (old_msg_id, old_hash) = published_cache[entry.link]
 
-        cur_msg_content = format_feed_entry(name, entry)
+        cur_msg_content = format_feed_entry(get_role(client, name), entry)
         cur_hash = hashtext(cur_msg_content)
 
         if cur_hash != old_hash:
@@ -113,6 +137,10 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
             old_msg = await channel.fetch_message(old_msg_id)
             warn_content = '**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + \
                     old_msg.content + '~~'
+
+            # shorten this text too
+            if len(warn_content) > 2000:
+               warn_content = warn_content[:1992] + ' (...)~~'
             await old_msg.edit(content=warn_content)
     except KeyError:
         return

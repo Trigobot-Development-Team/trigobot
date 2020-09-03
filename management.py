@@ -123,12 +123,11 @@ async def check_role_channel(feed: str) -> None:
     """
     global CHANNELS_CATEGORY
     guild = client.guilds[0]
-    roles = dict(zip(list(map(lambda x: x.name, guild.roles)), guild.roles))
+    role = get_role(client, feed)
     channels = list(map(lambda x: x.name, CHANNELS_CATEGORY.text_channels))
 
-    role = None
     # Check role
-    if feed not in roles:
+    if role is None:
         try:
             role = await guild.create_role(name=feed, \
                                            color=discord.Colour(random.randint(0, 0xffffff)), \
@@ -140,8 +139,6 @@ async def check_role_channel(feed: str) -> None:
         except Exception as err:
             logging.error('Couldn\'t create role: %s' % err)
             pass
-    else:
-        role = roles[feed]
 
     # Check textchannel
     if feed.lower() not in channels:
@@ -159,16 +156,15 @@ async def delete_role_channel(name: str) -> None:
     """
     Delete role, channel and special message (if exists)
     """
-    guild = client.guilds[0]
     low = name.lower()
-    roles = dict(zip(list(map(lambda x: x.name.lower(), guild.roles)), guild.roles))
+    role = get_role(client, name)
     channels = dict(zip(list(map(lambda x: x.name.lower(), CHANNELS_CATEGORY.text_channels)), CHANNELS_CATEGORY.text_channels))
 
-    if low not in roles:
+    if role is None:
         raise ValueError('Role %s not found' % name)
 
-    role = roles[low].id
-    await roles[low].delete()
+    await role.delete()
+    role = role.id
 
     if low not in channels:
         raise ValueError('Channel %s not found' % name)
@@ -229,3 +225,14 @@ def save() -> None:
     global special_messages
     with open(MESSAGES_PATH, "w") as f:
         json.dump(special_messages, f)
+
+def get_role(client: discord.Client, name: str) -> discord.Role:
+    """
+    Get role by name (None if not existent)
+    """
+    for role in client.guilds[0].roles:
+        if role.name.lower() == name.lower():
+            return role
+
+    return None
+
