@@ -21,6 +21,10 @@ def check_permissions(client: Client, channel: TextChannel, user: Member, **kwar
 def AccessControl(**rules):
     """
     Decorator to change command permissions
+
+    role_whitelist - Roles who can use it freely
+    relax_in - Channels where users can use it freely - Optional (default: all channels)
+    relax_pm - Whether can use it in DMs or not - Optional (default: False)
     """
     def _decorate(fn):
         def _wrapper(*args, **kwargs):
