@@ -8,10 +8,10 @@ from hooks import run_hooks
 import rss_autorefresh
 
 PIN_EMOJI = '📌'
-PIN_MIN_REACTIONS = 1
+PIN_MIN_REACTIONS = 5
 
 # Current category to create channels
-CHANNELS_CATEGORY = discord.CategoryChannel
+CHANNELS_CATEGORY = None
 
 # @everyone role
 EVERYONE = None
@@ -175,14 +175,16 @@ async def delete_role_channel(name: str) -> None:
     message = None
     for key, item in special_messages.items():
         if item == role:
-            message = int(key)
+            message = key
             break
 
     if message is None:
         return
 
     try:
-        await (await guild.get_channel(ROLES_CHANNEL_ID).fetch_message(message)).delete()
+        del special_messages[message]
+        await (await client.guilds[0].get_channel(ROLES_CHANNEL_ID).fetch_message(int(message))).delete()
+        save()
     except discord.NotFound:
         raise ValueError('Message for getting role %s not found' % name)
 
@@ -216,6 +218,14 @@ async def notify_new_role(role: discord.Role) -> None:
     special_messages[str(message.id)] = role.id
 
     await message.add_reaction(ROLE_EMOJI )
+    save()
+
+def clear_messages() -> None:
+    """
+    Removes all special messages
+    """
+    global special_messages
+    special_messages = dict()
     save()
 
 def save() -> None:

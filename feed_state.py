@@ -5,7 +5,7 @@ import asyncio
 
 from collections.abc import Iterator
 
-from management import check_role_channel
+from management import check_role_channel, clear_messages
 
 STATE_PATH = os.environ.get('TRIGOBOT_RSS_FEED_STATE', './feed_state.json')
 
@@ -24,6 +24,7 @@ async def loads(feeds: str) -> None:
     Replace current feeds with given argument (in JSON)
     """
     global _feeds
+    clear_messages()
     _feeds = json.loads(feeds)
 
     for feed in _feeds:
