@@ -1,10 +1,11 @@
 from discord import Client, Message
+import logging
 
 import feed_state
 from policy import AccessControl
 from management import delete_role_channel
 
-SHORT_HELP_TEXT = '$$$rss removeall <name> - Remove tudo o que está associado ao feed'
+SHORT_HELP_TEXT = '$$$rss removeall <name(s)> - Remove tudo o que está associado ao feed'
 
 def help(**kwargs):
     """
@@ -18,10 +19,14 @@ async def run(client: Client, message: Message, **kwargs):
     Run command
     """
     try:
-        name = kwargs['args'][0]
-    except IndexError:
+        for name in kwargs['args']:
+            try:
+                feed_state.delete(name)
+                await delete_role_channel(name)
+            except:
+                logging.error('No feed/role/channel named %s', name)
+                pass
+    except KeyError:
         raise ValueError('Missing argument: name')
 
-    feed_state.delete(name)
-    await delete_role_channel(name)
     await message.channel.send(content='Feito')
