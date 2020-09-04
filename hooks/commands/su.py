@@ -40,7 +40,7 @@ def get_user_from_mention(client: Client, mentions: list, mention: str) -> User:
 
         return get_user_by_id(client, mentions, int(name))
 
-@AccessControl(roles=['Staff'], relax_in=['botrequests'], relax_pm=True)
+@AccessControl(roles=['Staff'], relax_in=['justabunchofspam'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     if 'su_orig_user' in kwargs:
         raise ValueError('You can\'t su su')

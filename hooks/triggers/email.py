@@ -2,7 +2,7 @@ from discord import Client, Message
 from ._randomness import RandomChance
 
 # TODO: add cooldown
-@RandomChance(0.5)
+@RandomChance(0.1)
 async def run(client: Client, message: Message) -> bool:
     if 'mail' not in message.content.lower():
         return False

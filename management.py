@@ -24,7 +24,7 @@ EVERYONE_PERMISSIONS = discord.PermissionOverwrite(view_channel=False)
 # Messages to get roles
 special_messages = dict()
 ROLE_EMOJI = '✋'
-ROLES_CHANNEL_ID = 750825003402133524
+ROLES_CHANNEL_ID = 751508970308632757
 
 MESSAGES_PATH = os.environ.get('TRIGOBOT_SPECIAL_MESSAGES', './messages.json')
 

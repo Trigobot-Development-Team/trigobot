@@ -11,7 +11,7 @@ from hashlib import md5
 from management import get_role
 from time import time
 
-ANNOUNCE_CHANNEL_ID = 750401922267086948
+ANNOUNCE_CHANNEL_ID = 357975075468607491
 MAX_UPDATES = 5
 
 ICON_URL = "https://cdn.discordapp.com/icons/357975075468607490/866e9b0e471f720f592611360233f174.png?size=128"

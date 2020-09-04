@@ -29,7 +29,7 @@ def is_me(message: Message) -> bool:
 
 # Can't use in DMs because would need a lot of logic to delete
 # so no need to activate relax_pm
-@AccessControl(roles=['Staff'], relax_in=['botrequests'])
+@AccessControl(roles=['Staff'], relax_in=['justabunchofspam'])
 async def run(client: Client, message: Message, **kwargs):
     """
     Run command
