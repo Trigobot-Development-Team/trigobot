@@ -19,12 +19,13 @@ def save() -> None:
     with open(STATE_PATH, 'w') as f:
         json.dump(_feeds, f)
 
-async def loads(feeds: str) -> None:
+async def loads(feeds: str, init=False) -> None:
     """
     Replace current feeds with given argument (in JSON)
     """
     global _feeds
-    clear_messages()
+    if not init:
+        clear_messages()
     _feeds = json.loads(feeds)
 
     for feed in _feeds:
@@ -112,6 +113,6 @@ async def init() -> None:
     """
     try:
         with open(STATE_PATH, 'r') as f:
-            await loads(f.read())
+            await loads(f.read(), True)
     except FileNotFoundError:
         pass

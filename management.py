@@ -182,8 +182,8 @@ async def delete_role_channel(name: str) -> None:
         return
 
     try:
-        del special_messages[message]
         await (await client.guilds[0].get_channel(ROLES_CHANNEL_ID).fetch_message(int(message))).delete()
+        del special_messages[message]
         save()
     except discord.NotFound:
         raise ValueError('Message for getting role %s not found' % name)
