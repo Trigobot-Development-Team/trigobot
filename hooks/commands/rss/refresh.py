@@ -75,10 +75,12 @@ def format_feed_entry(role: Role, entry: dict) -> str:
     author_name = re.sub('(.*@.* \(|\))', '', entry['author'])
     embed = Embed(title='**[{}]** {}'.format(role.name, strip_html(entry['title'])), \
                   color=role.color,
-                  description="{}\n{}".format(role.mention, strip_html(entry['summary'])))
+                  description=strip_html(entry['summary']))
 
     embed.add_field(name='Anúncio Original', value='[Clica aqui](' + entry['link'] + ')')
     embed.set_author(name=author_name, url=entry['link'], icon_url=ICON_URL)
+
+    check_embed_len(embed, ' (...)')
 
     return embed
 
@@ -120,8 +122,9 @@ async def publish_entry(client: Client, channel: TextChannel, name: str, entry: 
     Send feed message and update LRU Cache
     """
     # send message
-    embed = format_feed_entry(get_role(client, name), entry)
-    msg = await channel.send(embed=embed)
+    role = get_role(client, name)
+    embed = format_feed_entry(role, entry)
+    msg = await channel.send(content=role.mention + '\n**' + strip_html(entry['title']) + '**', embed=embed)
 
     # save id & content hash to keep track of updates
     published_cache[entry.link] = (msg.id, hashtext(msg.embeds[0].description))
@@ -143,13 +146,13 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
 
             # mark old message as old
             old_msg = await channel.fetch_message(old_msg_id)
-            warn_content = '**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + \
-                    old_msg.embeds[0].description + '~~'
+            embed = Embed(description='**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + \
+                    old_msg.embeds[0].description + '~~')
 
             # shorten this text too
-            if len(warn_content) > 2000:
-               warn_content = warn_content[:1992] + ' (...)~~'
-            await old_msg.edit(content=warn_content)
+            check_embed_len(embed, ' (...)~~')
+
+            await old_msg.edit(embed=embed)
     except KeyError:
         return
 
@@ -158,8 +161,8 @@ def check_embed_len(embed: Embed, padd: str = ''):
     Checks if embed has correct size and padd if bigger
     """
 
-    if len(embed) > 6000:
-        embed.description = embed.description[:6000-len(padd)] + padd
+    if len(embed) > 2048:
+        embed.description = embed.description[:2048-len(padd)] + padd
 
 async def run(client: Client, message: Message = None, **kwargs) -> None:
     """
