@@ -18,6 +18,6 @@ async def run(client: Client, message: Message, **kwargs):
 
     # Split in 2000 chars' messages
     while len(msg) > 0:
-        await message.channel.send(content=msg[:2000])
-        msg = msg[2000:]
+        await message.channel.send(content='```\n' + msg[:1992] + '\n```')
+        msg = msg[1992:]
 
