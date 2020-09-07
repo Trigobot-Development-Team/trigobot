@@ -31,7 +31,7 @@ async def run(client: Client, message: Message, **kwargs):
         raise ValueError('Missing argument: name')
 
     try:
-        new_last_update = int(kwargs['args'][1])
+        new_last_update = kwargs['args'][1]
     except IndexError:
         raise ValueError('Missing argument: new time')
 
@@ -39,6 +39,8 @@ async def run(client: Client, message: Message, **kwargs):
         new_last_update = None
     elif new_last_update == 'now':
         new_last_update = get_current_timestamp()
+    else:
+        new_last_update = int(new_last_update)
 
     feed_state.update(name, new_last_update)
     await message.channel.send(content='Feito')
