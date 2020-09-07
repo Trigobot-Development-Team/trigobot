@@ -119,8 +119,8 @@ async def publish_entry(client: Client, channel: TextChannel, name: str, entry: 
     embed = format_feed_entry(role, entry)
     msg = await channel.send(content=role.mention + '\n**' + strip_html(entry['title']) + '**', embed=embed)
 
-    # save id & content hash to keep track of updates
-    published_cache[entry.link] = (msg.id, hash(embed))
+    # save id & content hash to keep track of update
+    published_cache[entry.link] = (msg.id, hash(embed.description))
 
 async def check_update_entry(client: Client, channel: TextChannel, name: str, entry: dict) -> None:
     """
@@ -130,7 +130,7 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
         (old_msg_id, old_hash) = published_cache[entry.link]
 
         cur_embed = format_feed_entry(get_role(client, name), entry)
-        cur_hash = hash(cur_embed)
+        cur_hash = hash(cur_embed.description)
 
         if cur_hash != old_hash:
             # need to publish new version
