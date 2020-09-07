@@ -7,7 +7,7 @@ def get_teacher_name() -> str:
     return random.choice(NAMES)
 
 # TODO: add cooldown
-@RandomChance(0.001)
+@RandomChance(0.1)
 async def run(client: Client, message: Message) -> bool:
     if 'piazza' not in message.content.lower():
         return False

@@ -1,17 +1,20 @@
-import re
+import feedparser
 import json
 import logging
-import feedparser
 from pylru import lrucache
+import re
 
 import feed_state
-from time import time
 from calendar import timegm
-from discord import Client, Message, TextChannel
+from discord import Client, Embed, Message, Role, TextChannel
 from hashlib import md5
+from management import get_role
+from time import time
 
 ANNOUNCE_CHANNEL_ID = 357975075468607491
 MAX_UPDATES = 5
+
+ICON_URL = "https://cdn.discordapp.com/icons/357975075468607490/866e9b0e471f720f592611360233f174.png?size=128"
 
 SHORT_HELP_TEXT = str.join('\n', [
     '$$$rss - Atualiza feeds',
@@ -22,30 +25,76 @@ SHORT_HELP_TEXT = str.join('\n', [
 # maps entry.link -> (message_id, content_hash)
 published_cache = lrucache(128)
 
-def help(**kwargs):
+def help(**kwargs) -> str:
+    """
+    Show help
+    """
     return SHORT_HELP_TEXT
 
-def strip_html(s: str) -> str:
-    data = re.sub('<br[^>]>', '\n', s)
+def strip_html(data: str) -> str:
+    """
+    Convert HTML to Markdown
+    """
+    # Transform &amp; into &
+    data = re.sub('&amp;', '&', data)
+    # Transform &lt; into <
+    data = re.sub('&lt;', '<', data)
+    # Transform &#34; into "
+    data = re.sub('&#34;', '"', data)
+    # Transform &#39; into '
+    data = re.sub('&#39;', '\'', data)
+    # Transform &#61 into @
+    data = re.sub('&#61;', '=', data)
+    # Transform &#64 into @
+    data = re.sub('&#64;', '@', data)
+    # Transform <br> into newline
+    data = re.sub('<br[^><\w]*\/?>', '\n', data)
+    # Transform <i> into italic
+    data = re.sub('<\/?i[^<>\w]*>', '*', data)
+    # Transform <b> into bold
+    data = re.sub('<\/?b[^<>\w]*>', '**', data)
+    # Transform headings in newlines and spaces
+    data = re.sub('<h\d?[^<>\w]*>', ' ', data)
+    data = re.sub('<\/h\d?[^<>\w]*>', '\n', data)
+    # Transform some divs into spaces
+    data = re.sub('</div[^<>\w]*>[^\w\n]*<div[^<>\w]*>', '\n', data)
+    # Avoid multiple whitespace
+    data = re.sub('\n{3,}', '\n', data)
+    data = re.sub('\s{3,}', ' ', data)
+    data = re.sub('\n\s*\n', '\n\n', data)
+
+    # Remove unknown/not needed html entities
+    data = re.sub('&#\d+;', ' ', data)
 
     return re.sub('<[^<]+?>|\\xa0', '', data)
 
-def format_feed_entry(feed_name: str, entry: dict) -> str:
-    # TODO: shorten link(s) (?)
-    msg = '{} {} \n{}\n'.format(feed_name, entry['link'], \
-                                strip_html(entry['summary']))
+def format_feed_entry(role: Role, entry: dict) -> str:
+    """
+    Format message
+    """
+    author_name = re.sub('(.*@.* \(|\))', '', entry['author'])
+    embed = Embed(title='**[{}]** {}'.format(role.name, strip_html(entry['title'])), \
+                  color=role.color,
+                  description=strip_html(entry['summary']))
 
-    # Shorten text when needed or Discord will refuse to send the message
-    if len(msg) > 2000:
-        msg = msg[:1994] + ' (...)'
+    embed.add_field(name='Anúncio Original', value='[Clica aqui](' + entry['link'] + ')')
+    embed.set_author(name=author_name, url=entry['link'], icon_url=ICON_URL)
 
-    return msg
+    check_embed_len(embed, ' (...)')
+
+    return embed
 
 def hashtext(text: str) -> int:
+    """
+    Generate MD5 digest
+    """
     hash_object = md5(text.encode())    # generates the md5 hash of a given str
     return hash_object.hexdigest()
 
 async def refresh_feed(client: Client, channel: TextChannel, name: str):
+    """
+    Check each feed for new messages
+    """
     logging.info('Refreshing feed %s', name)
 
     url = feed_state.get_url(name)
@@ -68,20 +117,27 @@ async def refresh_feed(client: Client, channel: TextChannel, name: str):
 
     feed_state.update(name, new_last_update)
 
-async def publish_entry(client: Client, channel: TextChannel, name: str, entry: dict):
+async def publish_entry(client: Client, channel: TextChannel, name: str, entry: dict) -> None:
+    """
+    Send feed message and update LRU Cache
+    """
     # send message
-    msg_content = format_feed_entry(name, entry)
-    msg = await channel.send(content=msg_content)
+    role = get_role(client, name)
+    embed = format_feed_entry(role, entry)
+    msg = await channel.send(content=role.mention + '\n**' + strip_html(entry['title']) + '**', embed=embed)
 
     # save id & content hash to keep track of updates
-    published_cache[entry.link] = (msg.id, hashtext(msg_content))
+    published_cache[entry.link] = (msg.id, hashtext(msg.embeds[0].description))
 
-async def check_update_entry(client: Client, channel: TextChannel, name: str, entry: dict):
+async def check_update_entry(client: Client, channel: TextChannel, name: str, entry: dict) -> None:
+    """
+    Check if new version is available, replace the old message and publish a new one
+    """
     try:
         (old_msg_id, old_hash) = published_cache[entry.link]
 
-        cur_msg_content = format_feed_entry(name, entry)
-        cur_hash = hashtext(cur_msg_content)
+        cur_embed = format_feed_entry(get_role(client, name), entry)
+        cur_hash = hashtext(cur_embed.description)
 
         if cur_hash != old_hash:
             # need to publish new version
@@ -90,13 +146,28 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
 
             # mark old message as old
             old_msg = await channel.fetch_message(old_msg_id)
-            warn_content = '**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + \
-                    old_msg.content + '~~'
-            await old_msg.edit(content=warn_content)
+            embed = Embed(description='**ESTE ANÚNCIO FOI ATUALIZADO**\n~~' + \
+                    old_msg.embeds[0].description + '~~')
+
+            # shorten this text too
+            check_embed_len(embed, ' (...)~~')
+
+            await old_msg.edit(embed=embed)
     except KeyError:
         return
 
-async def run(client: Client, message: Message = None, **kwargs):
+def check_embed_len(embed: Embed, padd: str = ''):
+    """
+    Checks if embed has correct size and padd if bigger
+    """
+
+    if len(embed) > 2048:
+        embed.description = embed.description[:2048-len(padd)] + padd
+
+async def run(client: Client, message: Message = None, **kwargs) -> None:
+    """
+    Run command
+    """
     channel = client.get_channel(ANNOUNCE_CHANNEL_ID)
 
     for feed_name in feed_state.get_names():

@@ -9,22 +9,22 @@ def help(**kwargs):
     return SHORT_HELP_TEXT
 
 def get_user_by_name(client: Client, name: str) -> User:
-    for member in client.get_all_members():
+    for member in client.guilds[0].members:
         if member.name == name:
             return member
 
     raise ValueError('Member not found')
 
-def get_user_by_id(client: Client, mentions: list, uid: str) -> User:
+def get_user_by_id(client: Client, mentions: list, uid: int) -> User:
     for user in mentions:
         if user.id == uid:
             return user
 
-    for member in client.get_all_members():
+    for member in client.guilds[0].members:
         if member.id == uid:
             return member
 
-    return client.fetch_user(uid)
+    return client.guilds[0].get_member(uid)
 
 def get_user_from_mention(client: Client, mentions: list, mention: str) -> User:
     if mention.startswith('@'):
@@ -38,9 +38,9 @@ def get_user_from_mention(client: Client, mentions: list, mention: str) -> User:
         if name[0] == '!':
             name = name[1:]
 
-        return get_user_by_id(client, mentions, name)
+        return get_user_by_id(client, mentions, int(name))
 
-@AccessControl(roles=['Staff'], relax_in=['botrequests'], relax_pm=True)
+@AccessControl(roles=['Staff'], relax_in=['justabunchofspam'], relax_pm=True)
 async def run(client: Client, message: Message, **kwargs):
     if 'su_orig_user' in kwargs:
         raise ValueError('You can\'t su su')

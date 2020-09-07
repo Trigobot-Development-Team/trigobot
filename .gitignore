@@ -5,3 +5,4 @@ env
 *.pyo
 
 feed_state.json
+messages.json
