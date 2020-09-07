@@ -84,13 +84,6 @@ def format_feed_entry(role: Role, entry: dict) -> str:
 
     return embed
 
-def hashtext(text: str) -> int:
-    """
-    Generate MD5 digest
-    """
-    hash_object = md5(text.encode())    # generates the md5 hash of a given str
-    return hash_object.hexdigest()
-
 async def refresh_feed(client: Client, channel: TextChannel, name: str):
     """
     Check each feed for new messages
@@ -127,7 +120,7 @@ async def publish_entry(client: Client, channel: TextChannel, name: str, entry: 
     msg = await channel.send(content=role.mention + '\n**' + strip_html(entry['title']) + '**', embed=embed)
 
     # save id & content hash to keep track of updates
-    published_cache[entry.link] = (msg.id, hashtext(msg.embeds[0].description))
+    published_cache[entry.link] = (msg.id, hash(embed))
 
 async def check_update_entry(client: Client, channel: TextChannel, name: str, entry: dict) -> None:
     """
@@ -137,7 +130,7 @@ async def check_update_entry(client: Client, channel: TextChannel, name: str, en
         (old_msg_id, old_hash) = published_cache[entry.link]
 
         cur_embed = format_feed_entry(get_role(client, name), entry)
-        cur_hash = hashtext(cur_embed.description)
+        cur_hash = hash(cur_embed)
 
         if cur_hash != old_hash:
             # need to publish new version
