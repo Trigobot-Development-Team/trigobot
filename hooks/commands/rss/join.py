@@ -1,6 +1,7 @@
 from discord import Client, Message
 
 import feed_state
+from policy import AccessControl
 
 SHORT_HELP_TEXT = '$$$rss join <dados em JSON> - Adiciona feeds aos existentes atualizando os que são comuns aos dois'
 
