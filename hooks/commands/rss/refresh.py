@@ -1,3 +1,5 @@
+import aiohttp
+import async_timeout
 import feedparser
 import json
 import logging
@@ -84,7 +86,14 @@ def format_feed_entry(role: Role, entry: dict) -> str:
 
     return embed
 
-async def refresh_feed(client: Client, channel: TextChannel, name: str):
+async def get_feed(session: aiohttp.ClientSession, url: str) -> str:
+    async with async_timeout.timeout(10):
+        async with session.get(url) as response:
+            raw_data = await response.text()
+            return feedparser.parse(raw_data)
+
+
+async def refresh_feed(session: aiohttp.ClientSession, client: Client, channel: TextChannel, name: str):
     """
     Check each feed for new messages
     """
@@ -93,7 +102,7 @@ async def refresh_feed(client: Client, channel: TextChannel, name: str):
     url = feed_state.get_url(name)
     last_update = feed_state.get_last_update(name)
 
-    data = feedparser.parse(url)
+    data = await get_feed(session, url)
     new_last_update = last_update
     cur_timestamp = time()
 
@@ -163,8 +172,9 @@ async def run(client: Client, message: Message = None, **kwargs) -> None:
     """
     channel = client.get_channel(ANNOUNCE_CHANNEL_ID)
 
-    for feed_name in feed_state.get_names():
-        await refresh_feed(client, channel, feed_name)
+    async with aiohttp.ClientSession() as session:
+        for feed_name in feed_state.get_names():
+            await refresh_feed(session, client, channel, feed_name)
 
     if message is not None:
         await message.channel.send(content='Feeds atualizados com sucesso')
