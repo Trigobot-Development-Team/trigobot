@@ -208,16 +208,19 @@ async def notify_new_role(role: discord.Role) -> None:
     """
     Send special message for users to react and receive the role
     """
+    react_description  = '**[PT]**\n\nSe vais fazer a cadeira **' + role.name + '** reage com ' + \
+        ROLE_EMOJI + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios\n Para desistires disto é só removeres a reação\n\n'
+    react_description += '**[EN]**\n\nIf you\'re enrolling in **' + role.name + '** react with ' + \
+        ROLE_EMOJI + ' to get access to the role ' + role.mention + ', to the channel and to receive notifications\n To quit, just remove the reaction'
     channel = client.get_channel(ROLES_CHANNEL_ID)
     message = await channel.send(embed=discord.Embed(title='**[' + role.name + ']** Nova cadeira disponível', \
                           type='rich', \
                           color=role.color, \
-                          description='Se vais fazer a cadeira **' + role.name + '** reage com ' + \
-                                           ROLE_EMOJI + ' para teres acesso ao role ' + role.mention + ', ao canal e receberes notificações de anúncios\n Para desistires disto é só removeres a reação'))
+                          description=react_description))
 
     special_messages[str(message.id)] = role.id
 
-    await message.add_reaction(ROLE_EMOJI )
+    await message.add_reaction(ROLE_EMOJI)
     save()
 
 def clear_messages() -> None:
