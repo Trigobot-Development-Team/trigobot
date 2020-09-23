@@ -124,7 +124,7 @@ async def check_role_channel(feed: str) -> None:
     global CHANNELS_CATEGORY
     guild = client.guilds[0]
     role = get_role(client, feed)
-    channels = list(map(lambda x: x.name, CHANNELS_CATEGORY.text_channels))
+    channels = list(map(lambda x: x.name, guild.text_channels))
 
     # Check role
     if role is None:
