@@ -10,6 +10,10 @@ import rss_autorefresh
 PIN_EMOJI = '📌'
 PIN_MIN_REACTIONS = 5
 
+# To enforce rules
+RULES_CHANNEL = 757603395799482478
+GENERAL_CHANNEL = 357975722029219850
+
 # Current category to create channels
 CHANNELS_CATEGORY = None
 
@@ -83,6 +87,50 @@ async def on_message(message: discord.Message) -> None:
         return
 
     await run_hooks(client, message)
+
+@client.event
+async def on_member_join(member: discord.Member):
+    """
+    Action to take when a member joins the server
+    """
+    dm = member.dm_channel
+    if dm == None:
+        dm = await member.create_dm()
+
+    try:
+        message = "**[PT]**\n\nBem vindo ao servidor de MEIC\n\n" + \
+            "Temos algumas instruções que deves seguir para melhor interagires com os outros membros e para teres uma melhor experiência no Técnico\n**INSTRUÇÕES:**\n" + \
+            "Vai ao canal **#registration** e inscreve-te nas cadeiras que vais fazer reagindo às respetivas mensagens do bot com :raised_hand: (podes desinscrever-te ou reinscrever-te a qualquer momento removendo/readicionando a reação)\n" + \
+            "Isto dar-te-á acesso ao role de cada cadeira (e ao respetivo canal), e esse role será taggado nos anúncios do Fénix dessa cadeira publicados em **#info-importante** (podes dar mute à vontade, porque vais receber notificação quando o anúncio for de uma das tuas cadeiras)\n\n" + \
+            "E temos também algumas regras para o bom funcionamento do servidor\n**REGRAS:**\n" + \
+            "0. Tenta organizar-te, isto é, assuntos relacionados com o tema X são discutidos no canal X\n" + \
+            "1. Muda o nick de forma a que os outros te consigam reconhecer, por exemplo, <primeiro nome> <apelido>, o Discord deixa-te ter um nick diferente para cada servidor, por isso não perdes o teu nick original\n" + \
+            "2. Assuntos de cadeiras são discutidos nos canais das cadeiras, não faças spam no **#general** com pedidos de grupos/elementos para grupo\n" + \
+            "3. Se há membros estrangeiros num canal, escreve em inglês (pelo menos nos canais das cadeiras)\n" + \
+            "4. Usa menções a roles das cadeiras (@<nome cadeira>) em vez de (@​here/@​everyone) a não ser que precises mesmo de chamar o @​Staff ao barulho\n" + \
+            "\nPergunta à vontade, alguém será capaz de te ajudar :wink:"
+
+        await dm.send(content=message)
+
+        message = "**[EN]**\n\nWelcome to the MEIC server\n\n" + \
+            "We have a few instructions that you should follow in order to better interact with the other members and for you to have a better experience in Técnico\n**INSTRUCTIONS:**\n" + \
+            "Go to **#registration** and sign up for your courses by reacting to their respective messages with :raised_hand: (you can remove/add the reaction at any time to undo/redo this action).\n" + \
+            "This will give you access to the course's role (and respective channel). That role will be tagged in the course's Fénix announcements published in **#info-importante** (feel free to mute this channel as you will receive notifications from your course's announcements)\n\n" + \
+            "We also have a few rules to ensure the smooth operation of the server\n**RULES:**\n" + \
+            "0. Try to organize your conversations. Topic X should be discussed inside channel X\n" + \
+            "1. Change your nickname to something others can recognize (e.g. <firstname> <lastname>). Discord allows you to have a different nickname for server, so, your original nickname is kept in the other servers\n" + \
+            "2. Course talks goes to course channels: don't spam **#general** with group paring stuff\n" + \
+            "3. If there are non-portuguese speakers in a channel, please use english\n" + \
+            "4. Use course role mentions (@<course name>) instead of the general ones (@​all/@​everyone/...), unless you really need @​Staff to hear about it\n" + \
+            "\nFeel free to ask, someone might be able to help you :wink:"
+
+        await dm.send(content=message)
+    except discord.Forbidden:
+        # Case user has DMs disabled for server members
+        channel = client.get_channel(GENERAL_CHANNEL)
+        message = "Hey " + member.mention + "\nCheck channel " + client.get_channel(RULES_CHANNEL).mention
+        await channel.send(content=message)
+
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, user: discord.User) -> None:
