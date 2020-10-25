@@ -174,7 +174,12 @@ async def run(client: Client, message: Message = None, **kwargs) -> None:
 
     async with aiohttp.ClientSession() as session:
         for feed_name in feed_state.get_names():
-            await refresh_feed(session, client, channel, feed_name)
+            try:
+                await refresh_feed(session, client, channel, feed_name)
+            except Exception:
+                logging.error("Could not refresh %s", feed_name, exc_info=True)
+                if message is not None:
+                    await message.channel.send(content=f'Could not refresh {feed_name}')
 
     if message is not None:
         await message.channel.send(content='Feeds atualizados com sucesso')
