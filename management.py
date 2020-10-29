@@ -158,7 +158,7 @@ async def on_reaction_add(reaction: discord.Reaction, user: discord.User) -> Non
     Action to take when a reaction is added to a message
     """
     if reaction.emoji == PIN_EMOJI and reaction.count >= PIN_MIN_REACTIONS and not reaction.message.pinned:
-        await reaction.message.pin()
+        await reaction.message.pin(reason="the people have spoken")
 
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent) -> None:
