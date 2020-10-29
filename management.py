@@ -32,7 +32,27 @@ ROLES_CHANNEL_ID = 751508970308632757
 
 MESSAGES_PATH = os.environ.get('TRIGOBOT_SPECIAL_MESSAGES', './messages.json')
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.guilds = True
+intents.members = True
+intents.presences = False
+intents.bans = False
+intents.emojis = False
+intents.integrations = False
+intents.webhooks = False
+intents.invites = False
+intents.voice_states = False
+intents.presences = False
+intents.messages = True
+intents.guild_messages = True
+intents.dm_messages = True
+intents.reactions = True
+intents.guild_reactions = True
+intents.dm_reactions = True
+intents.typing = False
+intents.guild_typing = False
+intents.dm_typing = False
+client = discord.Client(intents=intents)
 
 logging.basicConfig(level=logging.INFO)
 
