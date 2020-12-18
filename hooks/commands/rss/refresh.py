@@ -53,6 +53,8 @@ def strip_html(data: str) -> str:
     data = re.sub('<br[^><\w]*\/?>', '\n', data)
     # Transform <i> into italic
     data = re.sub('<\/?i[^<>\w]*>', '*', data)
+    # Transform <em> into italic
+    data = re.sub('<\/?em[^<>\w]*>', '*', data)
     # Transform <b> into bold
     data = re.sub('<\/?b[^<>\w]*>', '**', data)
     # Transform headings in newlines and spaces
