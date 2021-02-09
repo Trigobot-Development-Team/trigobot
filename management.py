@@ -20,10 +20,15 @@ CHANNELS_CATEGORY = None
 # @everyone role
 EVERYONE = None
 
+# Delegate's role
+DELEGATES = None
+DELEGATES_ROLE_ID = 672242739991281664
+
 # Basic permissions for new roles/channels
 ROLE_PERMISSIONS = None
 ROLE_CHANNEL_PERMISSIONS = discord.PermissionOverwrite(view_channel=True)
 EVERYONE_PERMISSIONS = discord.PermissionOverwrite(view_channel=False)
+DELEGATES_PERMISSIONS = discord.PermissionOverwrite(view_channel=True)
 
 # Messages to get roles
 special_messages = dict()
@@ -88,6 +93,10 @@ async def on_ready() -> None:
     EVERYONE = client.guilds[0].default_role
     global ROLE_PERMISSIONS
     ROLE_PERMISSIONS = EVERYONE.permissions
+
+    # Get delegate's role
+    global DELEGATES
+    DELEGATES = get_role_by_id(client, DELEGATES_ROLE_ID)
 
     # RSS initialization
     # Needs async to create roles/channels
@@ -214,7 +223,8 @@ async def check_role_channel(feed: str) -> None:
             await CHANNELS_CATEGORY.create_text_channel(name=feed,
                                                         overwrites={
                                                             EVERYONE: EVERYONE_PERMISSIONS,
-                                                            role: ROLE_CHANNEL_PERMISSIONS
+                                                            role: ROLE_CHANNEL_PERMISSIONS,
+                                                            DELEGATES: DELEGATES_PERMISSIONS,
                                                         })
         except Exception as err:
             logging.error('Couldn\'t create channel: %s' % err)
@@ -281,7 +291,7 @@ async def notify_new_role(role: discord.Role) -> None:
     react_description += '**[EN]**\n\nIf you\'re enrolling in **' + role.name + '** react with ' + \
         ROLE_EMOJI + ' to get access to the role ' + role.mention + ', to the channel and to receive notifications\n To quit, just remove the reaction'
     channel = client.get_channel(ROLES_CHANNEL_ID)
-    message = await channel.send(embed=discord.Embed(title='**[' + role.name + ']** Nova cadeira disponível', \
+    message = await channel.send(embed=discord.Embed(title='**[' + role.name + ']** New course available', \
                           type='rich', \
                           color=role.color, \
                           description=react_description))
@@ -317,3 +327,12 @@ def get_role(client: discord.Client, name: str) -> discord.Role:
 
     return None
 
+def get_role_by_id(client: discord.Client, id: int) -> discord.Role:
+    """
+    Get role by id (None if not existent)
+    """
+    for role in client.guilds[0].roles:
+        if role.id == id:
+            return role
+
+    return None
