@@ -25,7 +25,7 @@ SHORT_HELP_TEXT = str.join('\n', [
 
 # non-persistent state: message IDs for updating feed entries
 # maps entry.link -> (message_id, content_hash)
-published_cache = lrucache(128)
+published_cache = lrucache(256)
 
 def help(**kwargs) -> str:
     """

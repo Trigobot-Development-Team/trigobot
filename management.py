@@ -8,7 +8,7 @@ from hooks import run_hooks
 import rss_autorefresh
 
 PIN_EMOJI = '📌'
-PIN_MIN_REACTIONS = 5
+PIN_MIN_REACTIONS = 3
 
 # To enforce rules
 RULES_CHANNEL = 757603395799482478
